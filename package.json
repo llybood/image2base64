@@ -2,17 +2,17 @@
   "name": "image-to-base64",
   "version": "2.0.0",
   "private": true,
-  "description": "Image to Base64 converter — Next.js static site with bilingual SEO landing pages",
+  "description": "Image to Base64 converter — Next.js static site with English, Chinese and German SEO landing pages",
   "author": "llybood",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/llybood/image-to-base64.git"
+    "url": "git+https://github.com/llybood/image2base64.git"
   },
   "bugs": {
-    "url": "https://github.com/llybood/image-to-base64/issues"
+    "url": "https://github.com/llybood/image2base64/issues"
   },
-  "homepage": "https://github.com/llybood/image-to-base64#readme",
+  "homepage": "https://github.com/llybood/image2base64#readme",
   "engines": {
     "node": ">=18.18"
   },

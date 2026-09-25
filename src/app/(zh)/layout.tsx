@@ -5,9 +5,10 @@ import { Shell } from "@/components/Shell";
 import { buildMetadata } from "@/lib/site";
 
 /**
- * Root layout for the Chinese version, served at "/".
- * The (en) route group supplies its own root layout for "/en/", so each
- * language ships its own <html lang> instead of patching it at runtime.
+ * Root layout for the Chinese version, served at "/zh/".
+ * The (en) route group supplies its own root layout for the site root, so
+ * each language ships its own <html lang> instead of patching it at
+ * runtime.
  */
 export const metadata: Metadata = buildMetadata("zh");
 

@@ -72,7 +72,38 @@ const zh: Faq[] = [
   },
 ];
 
-export const FAQ: Record<Lang, Faq[]> = { zh, en };
+const de: Faq[] = [
+  {
+    q: "Wie wandle ich ein Bild in Base64 um?",
+    a: "Zieh ein Bild auf die Ablagefläche, klicke zum Auswählen einer Datei oder füge es direkt mit Strg+V (Cmd+V unter macOS) aus der Zwischenablage ein. Der Konverter liest die Bytes lokal und gibt den Base64-String sofort zurück – es gibt keinen Upload-Schritt und keine Warteschlange, das Ergebnis erscheint also so schnell, wie die Datei gelesen werden kann.",
+  },
+  {
+    q: "Wie wandle ich eine Bild-URL in Base64 um?",
+    a: "Füge die Bildadresse in das Feld „Bild-URL zu Base64“ ein und klicke auf Laden. Das Werkzeug fordert die Bytes an und kodiert sie direkt, wodurch du auch die exakte Originalgröße statt einer Schätzung erhältst. Erlaubt der Host keine Cross-Origin-Zugriffe, blockiert der Browser den Zugriff; der Konverter versucht es dann über ein Canvas-Element erneut und rät dir, falls auch das blockiert wird, das Bild herunterzuladen und den lokalen Upload zu nutzen.",
+  },
+  {
+    q: "Ist dieser Bild-zu-Base64-Konverter kostenlos und funktioniert er online?",
+    a: "Er ist kostenlos, benötigt kein Konto und läuft in jedem modernen Browser auf Desktop und Mobilgeräten. Da jede Umwandlung innerhalb der Seite stattfindet, gibt es nichts zu installieren, keine Warteschlange und kein Kontingent.",
+  },
+  {
+    q: "Was macht Base64-Kodieren mit der Dateigröße?",
+    a: "Base64-Kodieren bildet je 3 Bytes Binärdaten auf 4 ASCII-Zeichen ab, der kodierte Text ist also rund 33 % größer als die Originaldatei. Das Data-URI-Präfix kommt mit ein paar Zeichen hinzu. Die Statistikzeile über dem Ergebnis zeigt den gemessenen Wert für dein konkretes Bild und keine Faustregel.",
+  },
+  {
+    q: "Welche Bildformate kann ich Base64-kodieren?",
+    a: "JPG, JPEG, PNG, GIF, WebP, BMP, SVG und ICO, bis zu 10 MB pro Datei. SVG wird als Text gelesen, damit die Nutzlast mit dem Original-Markup identisch bleibt, und das im Ergebnis angezeigte Format wird anhand der Magic Bytes der Datei erkannt statt dem Dateinamen zu vertrauen.",
+  },
+  {
+    q: "Was kann ich mit der Data URI anfangen?",
+    a: "Füge sie in ein src-Attribut im HTML, ein background-image in CSS, ein Markdown-Bild oder einen JavaScript-String ein. Am nützlichsten ist sie für kleine Symbole und Logos, die sonst eine zusätzliche Netzwerkanfrage kosten würden; bei großen Fotos überwiegen die 33 % Mehraufwand und der Verlust des Browser-Caches meist den gesparten Request.",
+  },
+  {
+    q: "Werden meine Bilder auf einen Server hochgeladen?",
+    a: "Nein. Die Umwandlung läuft im Browserspeicher und die Bytes werden nie übertragen. Du kannst das im Netzwerk-Panel deines Browsers überprüfen – die einzigen Anfragen betreffen die Seite selbst.",
+  },
+];
+
+export const FAQ: Record<Lang, Faq[]> = { zh, en, de };
 
 /** Plain-text answer for structured data. */
 export const plain = (s: string) => s.replace(/`/g, "");

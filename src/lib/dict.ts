@@ -7,15 +7,14 @@ import type { Lang } from "./site";
    this dictionary is only for interface text, where a missing or
    mismatched key would be a visible bug.
 
-   `en` is declared as Record<keyof typeof zh, string>, so TypeScript
-   fails the build if the two languages ever drift out of sync.
+   Every non-default dictionary is declared as
+   Record<keyof typeof zh, string>, so TypeScript fails the build if any
+   language ever drifts out of sync with the reference key set.
    ============================================================ */
 
 const zh = {
   brand: "Base64 Studio",
   langSwitchLabel: "语言 / Language",
-  langZh: "中文",
-  langEn: "EN",
 
   noscriptTitle: "本工具需要启用 JavaScript 才能运行。",
   noscriptBody:
@@ -80,7 +79,6 @@ const zh = {
   footerCopy: "Base64 Studio · 纯前端工具，无需注册",
   footerPrivacy: "隐私说明",
   footerFormats: "格式支持",
-  footerLang: "English version",
   alertCloseLabel: "关闭提示",
 
   errNoFile: "未选择文件",
@@ -124,8 +122,6 @@ const zh = {
 const en: Record<keyof typeof zh, string> = {
   brand: "Base64 Studio",
   langSwitchLabel: "Language / 语言",
-  langZh: "中文",
-  langEn: "EN",
 
   noscriptTitle: "This tool requires JavaScript.",
   noscriptBody:
@@ -190,7 +186,6 @@ const en: Record<keyof typeof zh, string> = {
   footerCopy: "Base64 Studio · a pure front-end tool, no sign-up required",
   footerPrivacy: "Privacy",
   footerFormats: "Formats",
-  footerLang: "中文版",
   alertCloseLabel: "Dismiss notice",
 
   errNoFile: "No file selected",
@@ -232,7 +227,126 @@ const en: Record<keyof typeof zh, string> = {
   unitMB: "MB",
 };
 
-export const dict: Record<Lang, Record<keyof typeof zh, string>> = { zh, en };
+/*
+ * German. Informelles "du", passend zum direkten "you" der englischen
+ * Fassung und zum Ton von Entwicklerwerkzeugen. Auch die Tastenkürzel
+ * sind lokalisiert (Strg statt Ctrl) — "Ctrl+V" wäre auf einer deutschen
+ * Tastatur schlicht die falsche Beschriftung.
+ */
+const de: Record<keyof typeof zh, string> = {
+  brand: "Base64 Studio",
+  langSwitchLabel: "Sprache / Language",
+
+  noscriptTitle: "Dieses Werkzeug benötigt JavaScript.",
+  noscriptBody:
+    "Die Umwandlung von Bildern zu Base64 läuft vollständig in deinem Browser, deshalb ist JavaScript erforderlich. Bitte aktiviere es und lade die Seite neu.",
+
+  heroTitle: "Bild zu Base64 Konverter",
+  heroSubtitle:
+    "Bild in Base64 umwandeln – online, aus einer Datei, per Einfügen oder über eine Bild-URL. Du erhältst sofort eine Data URI und einen reinen Base64-String, und nichts wird hochgeladen.",
+  heroCtaPrimary: "Bild einfügen oder Strg+V drücken",
+  heroCtaSecondary: "Unterstützte Formate ansehen",
+
+  uploadTitle: "Bild auswählen",
+  uploadCountZero: "0 Dateien",
+  uploadCount: "{n} Dateien",
+  dropzoneAriaDesc: "Bild hierher ziehen oder klicken, um eine Datei auszuwählen",
+  dropTitle: "Zieh ein Bild hierher oder klicke zum Durchsuchen",
+  dropHint: "Unterstützt JPG · PNG · GIF · WebP · SVG, oder mit Strg+V einfügen",
+  dropTitleActive: "Loslassen, um das Bild hinzuzufügen",
+  pickButton: "Datei auswählen",
+  urlLabel: "Bild-URL zu Base64",
+  urlPlaceholder: "Bild-URL einfügen: https://example.com/pic.png",
+  loadButton: "Laden",
+  loadingButton: "Wird geladen…",
+  urlNote:
+    "Hinweis: Online-Bilder müssen Cross-Origin-Zugriffe erlauben. Schlägt es wegen CORS fehl, lade das Bild herunter und nutze den lokalen Upload.",
+
+  resultTitle: "Ergebnis",
+  badgeIdle: "Warte auf ein Bild",
+  badgeDone: "Umgewandelt",
+  badgeError: "Umwandlung fehlgeschlagen",
+  badgeBusy: "Wird umgewandelt…",
+  statOriginal: "Originalgröße",
+  statBase64: "Base64-Textgröße",
+  statIncrease: "Größenzunahme",
+  statFormat: "Format",
+  tabDataUri: "Data URI",
+  tabRawBase64: "Reines Base64",
+  codePlaceholder: "Wähle ein Bild aus oder zieh es hierher – das Ergebnis erscheint dann an dieser Stelle…",
+  charCount: "{n} Zeichen",
+  copyButton: "Kopieren",
+  copiedButton: "Kopiert",
+  downloadButton: ".txt herunterladen",
+  downloadFormat: ".{ext}-Text herunterladen",
+  resultNote: "Du bekommst eine klare Rückmeldung – bei Erfolg wie bei Fehlern",
+
+  formatsTitle: "Unterstützte Bildformate",
+  limitsTitle: "Grenzen und Limitierungen",
+  limitSingle: "Maximal <b>10 MB</b> pro Datei – größere Dateien werden mit Hinweis abgelehnt.",
+  limitBatch: "Mehrere Bilder sind möglich; kopiere oder lade jeden Eintrag einzeln.",
+  limitCors: "Online-Bilder, die CORS blockiert, lassen sich nicht lesen – lade sie herunter und nutze den lokalen Upload.",
+  limitBlocked: "Die Umwandlung läuft vollständig im lokalen Speicher; es wird nichts hochgeladen.",
+
+  listTitle: "Ergebnisliste",
+  clearAll: "Alle löschen",
+  listEmpty: "Noch keine Umwandlungen",
+  rowCopy: "Kopieren",
+  rowDownload: "Herunterladen",
+  rowRemove: "Entfernen",
+
+  privacyTitle: "Lokal umgewandelt – Bilder verlassen dieses Gerät nicht",
+  privacyDesc:
+    "Jede Umwandlung findet im Browserspeicher statt. Kein Bild wird an einen Server gesendet.",
+  footerCopy: "Base64 Studio · ein reines Frontend-Werkzeug, keine Anmeldung nötig",
+  footerPrivacy: "Datenschutz",
+  footerFormats: "Formate",
+  alertCloseLabel: "Hinweis schließen",
+
+  errNoFile: "Keine Datei ausgewählt",
+  errNoFileDesc: "Bitte wähle zuerst ein Bild aus, zieh es hierher oder füge es ein.",
+  errNotImage: "Nicht unterstützter Dateityp",
+  errNotImageDesc: "„{name}“ ist kein erkennbares Bild. Bitte nutze JPG, PNG, GIF, WebP oder SVG.",
+  errTooLarge: "Datei zu groß",
+  errTooLargeDesc:
+    "„{name}“ ist {size} groß und überschreitet damit das Limit von {limit} pro Datei – wurde übersprungen.",
+  errUrlEmpty: "Bild-URL eingeben",
+  errUrlEmptyDesc: "Das Feld ist leer. Füge einen Link ein, der mit http:// oder https:// beginnt.",
+  errUrlInvalid: "Ungültige URL",
+  errUrlInvalidDesc: "„{url}“ ist keine gültige Bild-URL. Bitte prüfe sie und versuche es erneut.",
+  errUrlLoad: "Online-Bild konnte nicht geladen werden",
+  errUrlLoadDesc:
+    "Das Bild konnte nicht gelesen werden – die URL ist möglicherweise tot, verweist nicht auf ein Bild, oder die Website blockiert Cross-Origin-Zugriffe (CORS). Lade es herunter und nutze den lokalen Upload.",
+  errUrlType: "Diese URL ist kein Bild",
+  errUrlTypeDesc: "Der Server hat den Content-Type {type} zurückgegeben – kein erkennbares Bild.",
+  errRead: "Datei konnte nicht gelesen werden",
+  errReadDesc:
+    "Beim Lesen von „{name}“ ist ein Fehler aufgetreten. Bitte versuche es erneut oder nutze eine andere Datei.",
+  errCanvas: "Bild konnte nicht dekodiert werden",
+  errCanvasDesc:
+    "„{name}“ konnte vom Browser nicht dekodiert werden; die Datei ist möglicherweise beschädigt.",
+  errCopy: "Kopieren fehlgeschlagen",
+  errCopyDesc:
+    "Der Browser hat den Zugriff auf die Zwischenablage verweigert. Markiere den Text manuell oder nutze die Schaltfläche zum Herunterladen.",
+  errCopyFallbackDesc:
+    "Die Zwischenablage ist nicht verfügbar, deshalb wurde der Text markiert – drücke Strg+C zum Kopieren.",
+
+  okCopy: "{label} in die Zwischenablage kopiert",
+  okDownload: "Download von {name} gestartet",
+  okLoaded: "Bild von der Online-URL geladen",
+  okAdded: "{n} Bild(er) hinzugefügt",
+  okSkipped: "{n} hinzugefügt, {m} übersprungen",
+  okCleared: "Alle Einträge gelöscht",
+  okRemoved: "Eintrag entfernt",
+
+  labelUri: "Data URI",
+  labelRaw: "Reines Base64",
+  unitBytes: "B",
+  unitKB: "KB",
+  unitMB: "MB",
+};
+
+export const dict: Record<Lang, Record<keyof typeof zh, string>> = { zh, en, de };
 export type Dict = typeof zh;
 
 /** Interpolate {placeholders}. Falls back to the key itself if absent. */

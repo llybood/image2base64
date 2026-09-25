@@ -273,7 +273,7 @@ async function testPage(cdp, origin, path, lang, consoleErrors) {
       codeBox: !!document.querySelector('#codeText'),
     };
   })()`);
-  const expectedLang = lang === "zh" ? "zh-CN" : "en";
+  const expectedLang = { en: "en", zh: "zh-CN", de: "de" }[lang];
   ok(shell.lang === expectedLang, `<html lang> stays ${expectedLang}`, `got ${shell.lang}`);
   ok(shell.headingCount === 1, "exactly one h1 after hydration", `found ${shell.headingCount}`);
   ok(shell.dropzone && shell.urlInput && shell.fileInput && shell.codeBox,
@@ -443,6 +443,74 @@ async function testPage(cdp, origin, path, lang, consoleErrors) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Narrow-viewport header
+ *
+ * The language switcher grows by one pill per shipped language, and the
+ * header is a single non-wrapping flex row — so adding a language is
+ * exactly the kind of change that silently overflows a phone. Measured
+ * rather than estimated: the last pill's right edge is compared against
+ * the viewport, not against a guess about text widths.
+ * ------------------------------------------------------------------ */
+
+async function testNarrowHeader(cdp, origin, path, consoleErrors) {
+  console.log(`\n=== NARROW 360px  ${path} ===`);
+
+  await cdp.send("Emulation.setDeviceMetricsOverride", {
+    width: 360,
+    height: 640,
+    deviceScaleFactor: 2,
+    mobile: true,
+  });
+  await cdp.send("Page.navigate", { url: origin + path });
+  await cdp.waitFor("document.readyState === 'complete'");
+
+  const m = await cdp.eval(`(() => {
+    const inner = document.querySelector('.nav__inner');
+    const pills = document.querySelectorAll('.lang__btn');
+    const last = pills[pills.length - 1];
+    const r = last ? last.getBoundingClientRect() : null;
+    const brand = document.querySelector('.nav__brand');
+    const b = brand ? brand.getBoundingClientRect() : null;
+    return {
+      buttons: pills.length,
+      navScrollWidth: inner.scrollWidth,
+      navClientWidth: inner.clientWidth,
+      docScrollWidth: document.documentElement.scrollWidth,
+      docClientWidth: document.documentElement.clientWidth,
+      lastRight: r ? Math.round(r.right) : -1,
+      lastLeft: r ? Math.round(r.left) : -1,
+      brandRight: b ? Math.round(b.right) : -1,
+      brandLeft: b ? Math.round(b.left) : -1,
+    };
+  })()`);
+
+  // Mirrors LANGS in src/lib/site.ts — kept literal for the same reason
+  // the SEO verifier keeps its own copy of the routing table.
+  const EXPECTED_LANGS = 3;
+
+  ok(m.buttons === EXPECTED_LANGS,
+    `all ${EXPECTED_LANGS} language buttons rendered (found ${m.buttons})`);
+  ok(m.navScrollWidth <= m.navClientWidth + 1,
+    "header row fits without overflow",
+    `scrollWidth ${m.navScrollWidth} vs clientWidth ${m.navClientWidth}`);
+  ok(m.docScrollWidth <= m.docClientWidth + 1,
+    "page has no horizontal scroll at 360px",
+    `document scrollWidth ${m.docScrollWidth} vs clientWidth ${m.docClientWidth}`);
+  ok(m.lastRight > 0 && m.lastRight <= 360,
+    "last language button sits inside the viewport",
+    `right edge at ${m.lastRight}px`);
+  ok(m.brandLeft >= 0 && m.brandRight < m.lastLeft,
+    "brand and switcher do not overlap",
+    `brand right ${m.brandRight}px vs switcher left ${m.lastLeft}px`);
+
+  const narrowErrors = consoleErrors.filter((e) => e.page === path);
+  ok(narrowErrors.length === 0, "no console errors at 360px",
+    narrowErrors.map((e) => `[${e.kind}] ${e.text}`).join("\n          ").slice(0, 400));
+
+  await cdp.send("Emulation.clearDeviceMetricsOverride");
+}
+
+/* ------------------------------------------------------------------ *
  * Run
  * ------------------------------------------------------------------ */
 
@@ -538,10 +606,20 @@ try {
   await cdp.send("Log.enable");
   await cdp.send("Page.enable");
 
+  /* English is the default language, so it is served from the site root;
+     Chinese lives under /zh/, German under /de/. Every language is
+     exercised, because a routing change that only half-lands would still
+     leave the others working. */
   currentPath = "/";
-  await testPage(cdp, origin, "/", "zh", consoleErrors);
-  currentPath = "/en/";
-  await testPage(cdp, origin, "/en/", "en", consoleErrors);
+  await testPage(cdp, origin, "/", "en", consoleErrors);
+  currentPath = "/zh/";
+  await testPage(cdp, origin, "/zh/", "zh", consoleErrors);
+  currentPath = "/de/";
+  await testPage(cdp, origin, "/de/", "de", consoleErrors);
+
+  /* Run last, because it overrides the emulated viewport. */
+  currentPath = "/de/ (360px)";
+  await testNarrowHeader(cdp, origin, "/de/", consoleErrors);
 } catch (e) {
   failures.push("smoke run aborted");
   console.error(`\nAborted: ${e.message}`);

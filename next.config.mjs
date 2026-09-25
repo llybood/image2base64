@@ -5,7 +5,7 @@ const nextConfig = {
   // keeps the zero-external-request profile the page already had, and
   // removes any server runtime from the deployment surface.
   output: "export",
-  // Emits /en/index.html rather than /en.html, matching the canonical
+  // Emits /zh/index.html rather than /zh.html, matching the canonical
   // URLs declared in metadata and the sitemap.
   trailingSlash: true,
   images: { unoptimized: true },

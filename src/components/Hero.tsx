@@ -1,5 +1,6 @@
+import { Fragment } from "react";
 import { dict } from "@/lib/dict";
-import { HTML_LANG, PATHS, type Lang } from "@/lib/site";
+import { HTML_LANG, LANGS, LANG_LABELS, PATHS, type Lang } from "@/lib/site";
 
 export function Hero({ lang }: { lang: Lang }) {
   const d = dict[lang];
@@ -26,7 +27,10 @@ export function Hero({ lang }: { lang: Lang }) {
 
 export function Footer({ lang }: { lang: Lang }) {
   const d = dict[lang];
-  const other: Lang = lang === "zh" ? "en" : "zh";
+  // A second, plain-text route to every other language. The header
+  // switcher already does this, but a redundant followable link in the
+  // footer costs nothing and survives a crawler that ignores the nav.
+  const others = LANGS.filter((l) => l !== lang);
 
   return (
     <footer className="footer">
@@ -36,10 +40,14 @@ export function Footer({ lang }: { lang: Lang }) {
           <a href="#privacy">{d.footerPrivacy}</a>
           &nbsp;·&nbsp;
           <a href="#formats">{d.footerFormats}</a>
-          &nbsp;·&nbsp;
-          <a href={PATHS[other]} hrefLang={HTML_LANG[other]}>
-            {d.footerLang}
-          </a>
+          {others.map((l) => (
+            <Fragment key={l}>
+              &nbsp;·&nbsp;
+              <a href={PATHS[l]} hrefLang={HTML_LANG[l]}>
+                {LANG_LABELS[l]}
+              </a>
+            </Fragment>
+          ))}
         </span>
       </div>
     </footer>

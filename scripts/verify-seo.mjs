@@ -48,6 +48,15 @@ const TARGETS = {
     { query: "base64 encode", probe: "base64 encode" },
     { query: "image to base64 converter", probe: "image to base64 converter" },
   ],
+  de: [
+    { query: "bild zu base64", probe: "bild zu base64" },
+    { query: "bild in base64 umwandeln", probe: "bild in base64 umwandeln" },
+    // German compounds the noun, so the page writes "Bild-URL" while the
+    // query is typed with a space. The probe is the literal on the page.
+    { query: "bild url zu base64", probe: "bild-url zu base64" },
+    { query: "base64 kodieren", probe: "base64 kodieren" },
+    { query: "base64 konverter", probe: "base64 konverter" },
+  ],
 };
 
 /*
@@ -57,6 +66,28 @@ const TARGETS = {
  * reject a perfectly fine English one.
  */
 const LIMITS = { title: 66, description: 200 };
+
+/* ---------- language routing, mirrored from src/lib/site.ts ----------
+ *
+ * Deliberately duplicated rather than imported: the verifier must not be
+ * able to drift along with the code it is checking. English is the default
+ * language, so it owns the site root and is what x-default must advertise.
+ *
+ * If a language is ever added or the default swapped, this block is the
+ * whole contract — the page checks at the bottom iterate LANGS, so a
+ * language cannot end up routed but unchecked.
+ *
+ * The set must match src/lib/site.ts; the order need not, because every
+ * assertion below is membership- or look-up based. It is kept in the same
+ * order anyway so the two lists can be diffed at a glance.
+ */
+const LANGS = ["en", "de", "zh"];
+const PATHS = { en: "/", zh: "/zh/", de: "/de/" };
+const HTML_LANG = { en: "en", zh: "zh-CN", de: "de" };
+const DEFAULT_LANG = "en";
+const DEFAULT_PATH = PATHS[DEFAULT_LANG];
+/** Every language except the default, for the cross-link assertions. */
+const OTHER_LANGS = LANGS.filter((l) => l !== DEFAULT_LANG);
 
 const CJK = /[\u2E80-\u9FFF\uFF00-\uFF60\u3000-\u303F]/;
 const width = (s) => [...s].reduce((n, c) => n + (CJK.test(c) ? 2 : 1), 0);
@@ -73,7 +104,13 @@ const decode = (s) =>
     .replace(/&nbsp;/g, " ")
     .replace(/&rsquo;|&#x2019;/g, "\u2019")
     .replace(/&hellip;/g, "\u2026")
-    .replace(/&mdash;/g, "\u2014");
+    .replace(/&mdash;/g, "\u2014")
+    .replace(/&ndash;/g, "\u2013")
+    // German typographic quotes, which sit the opposite way round from
+    // the English pair: opening is low-9, closing is high-6.
+    .replace(/&bdquo;/g, "\u201E")
+    .replace(/&ldquo;/g, "\u201C")
+    .replace(/&rdquo;/g, "\u201D");
 
 const attr = (html, re) => {
   const m = re.exec(html);
@@ -97,8 +134,36 @@ const headings = (html, level) =>
     .map((m) => decode(m[1].replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim())
     .filter(Boolean);
 
-const langs = (html) =>
-  [...html.matchAll(/<link[^>]+rel="alternate"[^>]+hreflang="([^"]+)"[^>]*>/gi)].map((m) => m[1]);
+/**
+ * hreflang → absolute URL, read from the page head's alternate links.
+ * Attribute matching is case-insensitive because the HTML uses `hrefLang`
+ * while the sitemap uses `hreflang`.
+ */
+function alternates(html) {
+  const map = {};
+  for (const m of html.matchAll(/<link[^>]+rel="alternate"[^>]*>/gi)) {
+    const hl = /hreflang="([^"]+)"/i.exec(m[0]);
+    const href = /href="([^"]+)"/i.exec(m[0]);
+    if (hl && href) map[hl[1]] = decode(href[1]);
+  }
+  return map;
+}
+
+/**
+ * Pathname of an absolute URL, normalised to a trailing slash.
+ *
+ * Comparing bare paths rather than full URLs is what makes the x-default
+ * assertion meaningful: "/" and "/zh/" both end in a slash, so a naive
+ * `endsWith("/")` would pass for either one and prove nothing.
+ */
+function pathOf(url) {
+  try {
+    const p = new URL(url).pathname;
+    return p.endsWith("/") ? p : `${p}/`;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Absolute URLs the page advertises in machine-readable metadata.
@@ -167,7 +232,7 @@ function checkPage(lang, file) {
 
   /* --- canonical + hreflang --- */
   const canonical = attr(html, /<link rel="canonical" href="([^"]*)"/i);
-  const expectedPath = lang === "zh" ? "/" : "/en/";
+  const expectedPath = PATHS[lang];
   ok(!!canonical, "has canonical");
   if (canonical) {
     ok(
@@ -176,19 +241,48 @@ function checkPage(lang, file) {
       `got ${canonical}`
     );
   }
-  const hs = langs(html);
-  for (const want of ["zh-CN", "en", "x-default"]) {
-    ok(hs.includes(want), `hreflang="${want}" present`);
+  const alt = alternates(html);
+  // Every shipped language, plus x-default, must be declared — on every
+  // page. A language that is routed but not advertised is unreachable to
+  // a crawler, which is the whole failure mode hreflang exists to avoid.
+  for (const want of [...LANGS.map((l) => HTML_LANG[l]), "x-default"]) {
+    ok(want in alt, `hreflang="${want}" present`);
+  }
+  // Each annotation must point where its code claims, not merely exist:
+  // a set that is present but mislabelled is worse than a missing one.
+  for (const l of LANGS) {
+    const code = HTML_LANG[l];
+    if (code in alt) {
+      ok(
+        pathOf(alt[code]) === PATHS[l],
+        `hreflang="${code}" points at ${PATHS[l]}`,
+        `got ${alt[code]}`
+      );
+    }
+  }
+  // The point of the x-default annotation is to name the default language,
+  // so this asserts where it points, not merely that it exists. All
+  // language pages must agree on it.
+  if ("x-default" in alt) {
+    ok(
+      pathOf(alt["x-default"]) === DEFAULT_PATH,
+      `x-default points at the default language (${DEFAULT_PATH})`,
+      `got ${alt["x-default"]}`
+    );
   }
 
   /* --- html lang --- */
-  // Anchor on whitespace so `data-lang="zh"` cannot be mistaken for `lang`.
+  // Anchor on whitespace so `data-lang="de"` cannot be mistaken for `lang`.
   const htmlLang = attr(html, /<html[^>]*\slang="([^"]+)"/i);
   ok(
-    htmlLang === (lang === "zh" ? "zh-CN" : "en"),
-    `<html lang> is ${lang === "zh" ? "zh-CN" : "en"}`,
+    htmlLang === HTML_LANG[lang],
+    `<html lang> is ${HTML_LANG[lang]}`,
     `got ${htmlLang}`
   );
+
+  /* --- Open Graph locale pair --- */
+  const ogLocale = attr(html, /<meta property="og:locale" content="([^"]*)"/i);
+  ok(/^[a-z]{2}_[A-Z]{2}$/.test(ogLocale || ""), `og:locale is well-formed`, `got ${ogLocale}`);
 
   /* --- one H1, and it carries the head term --- */
   ok(h1s.length === 1, `exactly one <h1> (found ${h1s.length})`);
@@ -237,9 +331,14 @@ function checkPage(lang, file) {
     );
   }
 
-  /* --- cross-language link, reachable without JS --- */
-  const otherHref = lang === "zh" ? 'href="/en/"' : 'href="/"';
-  ok(html.includes(otherHref), `links to the other language version (${otherHref})`);
+  /* --- cross-language links, reachable without JS --- */
+  // Every other language, not just one. With three languages a page that
+  // links to only one of its siblings still looks fine to a naive check
+  // while leaving the third unreachable by following links alone.
+  for (const l of LANGS.filter((x) => x !== lang)) {
+    const href = `href="${PATHS[l]}"`;
+    ok(html.includes(href), `links to the ${l} version (${href})`);
+  }
   ok(/aria-current="true"/.test(html), "current language marked with aria-current");
 
   /* --- the domain the page claims to live at --- */
@@ -272,9 +371,40 @@ function checkSiteFiles() {
 
   if (existsSync(sitemap)) {
     const xml = readFileSync(sitemap, "utf8");
-    ok(xml.includes("hreflang=\"zh-CN\""), "sitemap carries hreflang annotations");
-    ok(xml.includes("hreflang=\"en\""), "sitemap carries the en hreflang");
-    ok(xml.includes("/en/"), "sitemap lists /en/");
+    // Every language must be annotated in the sitemap too, not just
+    // listed — hreflang lives in two independent places by design.
+    for (const l of LANGS) {
+      ok(
+        xml.includes(`hreflang="${HTML_LANG[l]}"`),
+        `sitemap carries the ${HTML_LANG[l]} hreflang`
+      );
+    }
+
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => pathOf(m[1]));
+    ok(
+      locs.length === LANGS.length,
+      `sitemap lists exactly ${LANGS.length} URLs (found ${locs.length})`
+    );
+    ok(
+      locs.includes(DEFAULT_PATH),
+      `sitemap lists the default language as a page (${DEFAULT_PATH})`
+    );
+    for (const l of OTHER_LANGS) {
+      ok(locs.includes(PATHS[l]), `sitemap lists the ${l} page (${PATHS[l]})`);
+    }
+    // No duplicate <loc>: two entries for one URL is a sitemap error, and
+    // an easy one to introduce when the list is generated.
+    ok(new Set(locs).size === locs.length, "sitemap lists no URL twice");
+
+    const xd = /hreflang="x-default"\s+href="([^"]+)"/i.exec(xml);
+    ok(!!xd, "sitemap carries an x-default annotation");
+    if (xd) {
+      ok(
+        pathOf(xd[1]) === DEFAULT_PATH,
+        `sitemap x-default points at the default language (${DEFAULT_PATH})`,
+        `got ${xd[1]}`
+      );
+    }
   }
   if (existsSync(robots)) {
     const txt = readFileSync(robots, "utf8");
@@ -288,8 +418,12 @@ console.log("Base64 Studio — SEO verification");
 if (realDomain) console.log(`domain under test: ${realDomain}`);
 else console.log("(pass a domain as argv[2] to also assert the placeholder is gone)");
 
-checkPage("zh", join(OUT, "index.html"));
-checkPage("en", join(OUT, "en", "index.html"));
+/** out/index.html for "/", out/zh/index.html for "/zh/", and so on. */
+const pageFile = (lang) =>
+  join(OUT, ...PATHS[lang].split("/").filter(Boolean), "index.html");
+
+// Driven by LANGS, so a language cannot end up routed but unchecked.
+for (const lang of LANGS) checkPage(lang, pageFile(lang));
 checkSiteFiles();
 
 console.log(`\n${"-".repeat(52)}`);

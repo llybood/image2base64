@@ -75,7 +75,7 @@ export function useConverter(lang: Lang) {
 
   /* ---------------- error text mapping ----------------
      convert.ts reports codes, never prose — the message is resolved here
-     so one conversion core serves both languages. */
+     so one conversion core serves every language. */
 
   const loadErrorText = useCallback(
     (err: LoadError): { title: string; desc: string } => {

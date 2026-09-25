@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { PATHS, abs } from "@/lib/site";
+import { DEFAULT_LANG, LANGS, PATHS, abs, hreflangMap, type Lang } from "@/lib/site";
 
 export const dynamic = "force-static";
 
@@ -19,26 +19,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // hreflang annotations live in the sitemap as well as in the page head:
   // they are the two independent places a crawler looks for the pairing.
-  const languages = {
-    "zh-CN": abs(PATHS.zh),
-    en: abs(PATHS.en),
-    "x-default": abs(PATHS.zh),
-  };
+  // Built from the same LANGS-derived map the head uses, then made
+  // absolute — so the sitemap cannot advertise a language the site does
+  // not route, or omit one it does.
+  const languages = Object.fromEntries(
+    Object.entries(hreflangMap(true)).map(([code, path]) => [code, abs(path)])
+  );
 
-  return [
-    {
-      url: abs(PATHS.zh),
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 1,
-      alternates: { languages },
-    },
-    {
-      url: abs(PATHS.en),
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.9,
-      alternates: { languages },
-    },
-  ];
+  // One entry per shipped language. The default language is listed first
+  // and carries full priority; the ordering is a weak hint to crawlers,
+  // but it keeps the sitemap reading in the same order as the page head
+  // declares its alternates.
+  const entry = (lang: Lang): MetadataRoute.Sitemap[number] => ({
+    url: abs(PATHS[lang]),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: lang === DEFAULT_LANG ? 1 : 0.9,
+    alternates: { languages },
+  });
+
+  return LANGS.map(entry);
 }
