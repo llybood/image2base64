@@ -1,0 +1,11 @@
+# Base64 Studio — static, fully client-side tool.
+# Two language versions, one canonical URL each.
+
+User-agent: *
+Allow: /
+
+# Reserved: if a '?url=' prefill feature is ever added, those URLs become
+# near-duplicate permutations of this page. Keep them out of the index.
+Disallow: /*?url=
+
+Sitemap: https://example.com/sitemap.xml

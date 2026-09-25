@@ -1,0 +1,41 @@
+{
+  "name": "image-to-base64",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Image to Base64 converter — Next.js static site with bilingual SEO landing pages",
+  "author": "llybood",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/llybood/image-to-base64.git"
+  },
+  "bugs": {
+    "url": "https://github.com/llybood/image-to-base64/issues"
+  },
+  "homepage": "https://github.com/llybood/image-to-base64#readme",
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "npx serve out",
+    "verify": "node scripts/verify-seo.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "check": "node scripts/verify-seo.mjs && node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "next": "^15.5.26",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.28"
+  }
+}

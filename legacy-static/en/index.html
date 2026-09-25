@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+<!-- ============================================================
+     SEO — every absolute URL below is injected by build.js.
+
+     To change the domain:
+         node build.js https://your-domain.com
+
+     The marker on the next line is rewritten in place, so this file
+     stays the single source of truth and "/" and "/en/" can never
+     drift apart. Do not hand-edit the URLs — edit the marker, or
+     pass the domain on the command line.
+     ============================================================ -->
+<!-- SITE_URL: https://example.com -->
+<title data-i18n="pageTitle">Image to Base64 Converter - Data URI &amp; Raw Base64</title>
+<meta name="description" content="Convert JPG, PNG, GIF, WebP or SVG into Base64 and Data URI online. See the image format, original size and size increase. Everything runs in your browser — nothing is uploaded." />
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+
+<link rel="canonical" href="https://example.com/en/" />
+<link rel="alternate" hreflang="zh-CN" href="https://example.com/" />
+<link rel="alternate" hreflang="en" href="https://example.com/en/" />
+<link rel="alternate" hreflang="x-default" href="https://example.com/" />
+
+<!-- icons & theme -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="theme-color" content="#000000" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Base64 Studio" />
+<meta property="og:title" content="Image to Base64 Converter - Data URI &amp; Raw Base64" />
+<meta property="og:description" content="Convert JPG, PNG, GIF, WebP or SVG into Base64 and Data URI online. See the image format, original size and size increase. Everything runs in your browser — nothing is uploaded." />
+<meta property="og:url" content="https://example.com/en/" />
+<meta property="og:image" content="https://example.com/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="The Base64 Studio interface: converting an image to Base64 and Data URI, entirely in the browser" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="zh_CN" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Image to Base64 Converter - Data URI &amp; Raw Base64" />
+<meta name="twitter:description" content="Convert JPG, PNG, GIF, WebP or SVG into Base64 and Data URI online. See the image format, original size and size increase. Everything runs in your browser — nothing is uploaded." />
+<meta name="twitter:image" content="https://example.com/og-cover.png" />
+<style>
+/* ============================================================
+   Design tokens — Apple-style product surface
+   ============================================================ */
+:root{
+  --primary:#0066cc;
+  --primary-focus:#0071e3;
+  --primary-on-dark:#2997ff;
+  --success:#1d8a4c;
+  --danger:#c8342b;
+
+  --ink:#1d1d1f;
+  --ink-80:#333333;
+  --ink-48:#7a7a7a;
+  --hairline:#e0e0e0;
+  --divider-soft:#f0f0f0;
+  --canvas:#ffffff;
+  --parchment:#f5f5f7;
+  --pearl:#fafafc;
+  --tile:#272729;
+  --code-bg:#1d1d1f;
+
+  --r-xs:5px; --r-sm:8px; --r-md:11px; --r-lg:18px; --r-pill:999px;
+
+  --sp-xxs:4px; --sp-xs:8px; --sp-sm:12px; --sp-md:17px;
+  --sp-lg:24px; --sp-xl:32px; --sp-xxl:48px; --sp-section:80px;
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --shadow-lift: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+/* noscript fallback */
+.noscript-note{
+  background:#fff4e5; border-bottom:1px solid #f0d9b5; color:#6b4d16;
+  padding:14px 32px; font-size:14px; line-height:1.65; text-align:center;
+}
+.noscript-note b{ display:block; margin-bottom:2px; }
+.noscript-note__en{ display:block; margin-top:4px; opacity:.85; }
+
+body{
+  margin:0;
+  font-family:var(--font);
+  font-size:17px;
+  line-height:1.47;
+  letter-spacing:-0.022em;
+  color:var(--ink);
+  background:var(--canvas);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+button,input,textarea{ font:inherit; color:inherit; }
+
+:focus-visible{ outline:2px solid var(--primary-focus); outline-offset:2px; border-radius:var(--r-xs); }
+
+.container{ width:100%; max-width:1440px; margin:0 auto; padding:0 32px; }
+
+/* ============================================================
+   Global nav (44px, pure black)
+   ============================================================ */
+.nav{
+  position:sticky; top:0; z-index:40;
+  height:44px; background:#000; color:#fff;
+}
+.nav__inner{
+  height:100%; display:flex; align-items:center; gap:20px;
+}
+.nav__brand{
+  font-size:12px; font-weight:600; letter-spacing:0;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.nav__brand svg{ display:block; }
+.nav__spacer{ flex:1; }
+
+.lang{
+  display:inline-flex; align-items:center;
+  background:var(--tile); border-radius:var(--r-sm); padding:2px;
+}
+.lang__btn{
+  appearance:none; border:0; background:transparent; color:#cccccc;
+  font-size:12px; line-height:1; padding:6px 12px; border-radius:6px;
+  text-decoration:none; display:inline-block; white-space:nowrap;
+  cursor:pointer; transition:background .18s ease, color .18s ease;
+}
+.lang__btn:hover{ color:#fff; }
+.lang__btn[aria-current="true"]{ background:var(--primary); color:#fff; font-weight:600; }
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero{
+  padding:72px 0 40px;
+  text-align:center;
+}
+.hero h1{
+  margin:0 0 16px;
+  font-size:56px; font-weight:600; line-height:1.07; letter-spacing:-0.025em;
+}
+.hero p{
+  margin:0 auto; max-width:760px;
+  font-size:21px; line-height:1.5; color:var(--ink-48);
+}
+.hero__actions{
+  margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn{
+  appearance:none; border:0; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:44px; padding:11px 22px;
+  border-radius:var(--r-pill);
+  font-size:17px; letter-spacing:-0.022em;
+  background:transparent; color:var(--primary);
+  transition:transform .12s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+}
+.btn:active{ transform:scale(.95); }
+.btn:disabled{ opacity:.42; cursor:not-allowed; transform:none; }
+
+.btn--primary{ background:var(--primary); color:#fff; }
+.btn--primary:hover:not(:disabled){ background:#0058b0; }
+
+.btn--ghost{ border:1px solid var(--primary); color:var(--primary); }
+.btn--ghost:hover:not(:disabled){ background:rgba(0,102,204,.06); }
+
+.btn--dark{ background:var(--ink); color:#fff; border-radius:var(--r-sm); font-size:14px; min-height:40px; padding:8px 16px; }
+.btn--dark:hover:not(:disabled){ background:#000; }
+
+.btn--pearl{
+  background:var(--pearl); color:var(--ink-80);
+  border:1px solid var(--hairline); border-radius:var(--r-md);
+  font-size:14px; min-height:32px; padding:6px 14px;
+}
+.btn--pearl:hover:not(:disabled){ background:#fff; border-color:#cfcfd3; }
+
+.btn--sm{ font-size:14px; min-height:36px; padding:8px 16px; }
+
+.linkish{
+  appearance:none; border:0; background:none; cursor:pointer;
+  color:var(--primary); font-size:14px; padding:4px 2px;
+}
+.linkish:hover{ text-decoration:underline; }
+
+/* ============================================================
+   Layout grid
+   ============================================================ */
+.workspace{
+  background:var(--parchment);
+  padding:40px 0 56px;
+}
+.workspace__grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;
+  gap:24px;
+  align-items:start;
+}
+.col{ display:flex; flex-direction:column; gap:24px; min-width:0; }
+
+/* ============================================================
+   Card
+   ============================================================ */
+.card{
+  background:var(--canvas);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-lg);
+  padding:24px;
+}
+.card__head{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  margin-bottom:16px;
+}
+.card__title{ margin:0; font-size:21px; font-weight:600; letter-spacing:-0.012em; }
+.card__title--sm{ font-size:17px; }
+.card__meta{ font-size:14px; color:var(--ink-48); }
+
+/* ============================================================
+   Drop zone
+   ============================================================ */
+.dropzone{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  min-height:220px; padding:24px;
+  background:var(--pearl);
+  border:1.5px dashed #d2d2d7;
+  border-radius:var(--r-md);
+  text-align:center;
+  cursor:pointer;
+  transition:background .18s ease, border-color .18s ease;
+}
+.dropzone:hover{ background:#f4f4f7; }
+.dropzone.is-dragover{
+  background:rgba(0,102,204,.05);
+  border-color:var(--primary);
+  border-style:solid;
+}
+.dropzone.is-dragover .dropzone__icon{ transform:translateY(-3px); }
+.dropzone__icon{ color:var(--primary); transition:transform .18s ease; }
+.dropzone__title{ font-size:17px; font-weight:600; }
+.dropzone__hint{ font-size:14px; color:var(--ink-48); line-height:1.43; }
+.dropzone__cta{ margin-top:4px; }
+
+/* URL row */
+.urlrow{ display:flex; gap:12px; margin-top:16px; }
+.input{
+  flex:1; min-width:0; height:44px;
+  padding:0 20px;
+  background:var(--canvas);
+  border:1px solid #d2d2d7;
+  border-radius:var(--r-pill);
+  font-size:15px; letter-spacing:-0.01em;
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+.input::placeholder{ color:#9a9aa0; }
+.input:focus{ outline:none; border-color:var(--primary-focus); box-shadow:0 0 0 3px rgba(0,113,227,.16); }
+.input--invalid{ border-color:var(--danger); }
+
+.url-note{
+  margin-top:10px; font-size:12px; color:var(--ink-48); line-height:1.5;
+}
+
+/* ============================================================
+   Alert / banner
+   ============================================================ */
+.alert{
+  display:flex; gap:10px; align-items:flex-start;
+  padding:12px 14px;
+  border-radius:var(--r-md);
+  font-size:14px; line-height:1.5;
+  margin-top:14px;
+}
+.alert[hidden]{ display:none; }
+.alert__icon{ flex:none; margin-top:2px; }
+.alert--error{ background:rgba(200,52,43,.07); color:#8c221c; border:1px solid rgba(200,52,43,.22); }
+.alert--warn{ background:rgba(176,124,0,.08); color:#7a5600; border:1px solid rgba(176,124,0,.24); }
+.alert--info{ background:rgba(0,102,204,.06); color:#0a4a86; border:1px solid rgba(0,102,204,.18); }
+.alert__body{ flex:1; min-width:0; }
+.alert__title{ font-weight:600; }
+.alert__desc{ margin-top:2px; }
+.alert__close{
+  appearance:none; border:0; background:none; cursor:pointer;
+  color:currentColor; opacity:.6; font-size:18px; line-height:1; padding:0 2px;
+}
+.alert__close:hover{ opacity:1; }
+
+/* ============================================================
+   Result
+   ============================================================ */
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 14px;
+  background:var(--pearl);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-md);
+  font-size:14px; color:var(--ink-80);
+}
+.badge--ok{ color:var(--success); }
+.badge--err{ color:var(--danger); }
+.badge--busy{ color:var(--ink-48); }
+
+.metastrip{
+  display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+  padding:16px;
+  background:var(--parchment);
+  border-radius:var(--r-md);
+}
+.metastrip__thumb{
+  flex:none; width:56px; height:56px;
+  border:1px solid var(--hairline); border-radius:var(--r-sm);
+  background:#fff; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.metastrip__thumb img{ width:100%; height:100%; object-fit:contain; display:block; }
+.metastrip__name{ flex:1 1 180px; min-width:0; }
+.metastrip__name b{ display:block; font-size:17px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.metastrip__name span{ font-size:14px; color:var(--ink-48); }
+.stat{ display:flex; flex-direction:column; gap:2px; }
+.stat__k{ font-size:12px; color:var(--ink-48); }
+.stat__v{ font-size:17px; font-weight:600; font-variant-numeric:tabular-nums; }
+.stat__v--accent{ color:var(--primary); }
+
+.tabs{ display:flex; align-items:center; gap:8px; margin:18px 0 10px; flex-wrap:wrap; }
+.tab{
+  appearance:none; border:0; cursor:pointer; background:transparent;
+  padding:6px 14px; border-radius:var(--r-pill);
+  font-size:14px; color:var(--ink-48);
+  transition:background .18s ease, color .18s ease;
+}
+.tab[aria-selected="true"]{ background:var(--parchment); color:var(--ink); font-weight:600; }
+.tabs__spacer{ flex:1; }
+.tabs__meta{ font-size:12px; color:var(--ink-48); font-variant-numeric:tabular-nums; }
+
+.codebox{
+  position:relative;
+  background:var(--code-bg);
+  border-radius:var(--r-md);
+  padding:16px;
+  max-height:220px; overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.codebox pre{
+  margin:0; color:#fff;
+  font-family:var(--font-mono); font-size:13px; line-height:1.6;
+  letter-spacing:0;
+  white-space:pre-wrap; word-break:break-all;
+}
+.codebox--empty pre{ color:#8e8e93; font-style:italic; }
+
+.codebox::-webkit-scrollbar{ width:10px; height:10px; }
+.codebox::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.22); border-radius:999px; }
+.codebox::-webkit-scrollbar-track{ background:transparent; }
+
+.result__actions{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin-top:16px;
+}
+.result__note{ margin-left:auto; font-size:12px; color:var(--ink-48); }
+
+/* ============================================================
+   Result list
+   ============================================================ */
+.list{ display:flex; flex-direction:column; gap:10px; }
+.item{
+  display:flex; align-items:center; gap:12px;
+  padding:12px;
+  background:var(--parchment);
+  border-radius:var(--r-md);
+  border:1px solid transparent;
+  transition:border-color .18s ease;
+}
+.item:hover{ border-color:var(--hairline); }
+.item__thumb{
+  flex:none; width:40px; height:40px; border-radius:var(--r-sm);
+  background:#fff; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.item__thumb img{ width:100%; height:100%; object-fit:contain; display:block; }
+.item__meta{ flex:1; min-width:0; }
+.item__name{ font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.item__sub{ font-size:12px; color:var(--ink-48); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.item__actions{ display:flex; gap:6px; flex:none; }
+
+.empty{ padding:20px 4px; font-size:14px; color:var(--ink-48); text-align:center; }
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toasts{
+  position:fixed; left:50%; bottom:32px; transform:translateX(-50%);
+  z-index:80;
+  display:flex; flex-direction:column; gap:8px; align-items:center;
+  pointer-events:none; width:min(92vw,520px);
+}
+.toast{
+  display:flex; align-items:center; gap:8px;
+  width:100%;
+  padding:11px 16px;
+  background:rgba(29,29,31,.96);
+  color:#fff;
+  border-radius:var(--r-md);
+  font-size:14px;
+  box-shadow:0 8px 28px rgba(0,0,0,.24);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  animation:toast-in .22s ease both;
+}
+.toast--out{ animation:toast-out .2s ease both; }
+.toast svg{ flex:none; }
+.toast__text{ min-width:0; }
+@keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:none;} }
+@keyframes toast-out{ to{ opacity:0; transform:translateY(8px);} }
+
+/* ============================================================
+   Right column details
+   ============================================================ */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.chip{
+  padding:6px 12px; border-radius:var(--r-md);
+  background:var(--canvas); border:1px solid var(--hairline);
+  font-size:13px; color:var(--ink-80);
+}
+.chip--on{ border-color:rgba(0,102,204,.4); color:var(--primary); background:rgba(0,102,204,.05); }
+
+.bullets{ display:flex; flex-direction:column; gap:12px; margin:0; padding:0; list-style:none; }
+.bullets li{ display:flex; gap:10px; font-size:14px; line-height:1.57; color:var(--ink-80); }
+.bullets li::before{
+  content:""; flex:none; width:6px; height:6px; margin-top:8px;
+  border-radius:50%; background:var(--ink-48);
+}
+.bullets li b{ font-weight:600; color:var(--ink); }
+
+.privacy{
+  display:flex; gap:12px; align-items:flex-start;
+  padding:24px;
+  background:var(--tile); color:#fff;
+  border-radius:var(--r-lg);
+}
+.privacy svg{ flex:none; margin-top:2px; }
+.privacy b{ display:block; font-size:14px; font-weight:600; }
+.privacy p{ margin:6px 0 0; font-size:12px; line-height:1.67; color:#cccccc; }
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer{
+  background:var(--parchment); color:var(--ink-48);
+  padding:24px 0 40px;
+}
+.footer__inner{
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  border-top:1px solid var(--hairline); padding-top:24px;
+  font-size:12px;
+}
+.footer a{ color:var(--primary); text-decoration:none; }
+.footer a:hover{ text-decoration:underline; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:1068px){
+  .hero h1{ font-size:40px; }
+  .hero p{ font-size:19px; }
+  .workspace__grid{ grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:833px){
+  .container{ padding:0 24px; }
+  .hero{ padding:56px 0 32px; }
+  .hero h1{ font-size:34px; }
+  .hero p{ font-size:17px; }
+  .workspace{ padding:32px 0 48px; }
+  .card{ padding:20px; }
+  .card__title{ font-size:19px; }
+}
+@media (max-width:640px){
+  body{ font-size:16px; }
+  .container{ padding:0 16px; }
+  .hero{ padding:40px 0 24px; }
+  .hero h1{ font-size:28px; }
+  .hero p{ font-size:16px; }
+  .hero__actions .btn{ width:100%; }
+  .urlrow{ flex-direction:column; }
+  .urlrow .input{ height:44px; }
+  .urlrow .btn{ width:100%; }
+  .metastrip{ gap:14px; }
+  .metastrip__thumb{ width:48px; height:48px; }
+  .result__note{ margin-left:0; width:100%; }
+  .result__actions .btn{ flex:1 1 auto; }
+  .toasts{ bottom:16px; }
+}
+@media (prefers-reduced-motion:reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+</style>
+
+<!-- ============================================================
+     Structured data — WebApplication
+     Deliberately omits aggregateRating: this tool has no real
+     rating data, and fabricating one breaches search-engine
+     structured-data policy.
+     ============================================================ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Base64 Studio — Image to Base64",
+  "alternateName": "图片转 Base64",
+  "url": "https://example.com/en/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "description": "Free online tool that converts JPG, PNG, GIF, WebP and SVG images into Base64 and Data URI strings, showing the image format, original size and size increase. Everything runs locally in your browser.",
+  "featureList": [
+    "Pick, drag-and-drop or paste a local image from the clipboard",
+    "Load an image from a URL, with clear guidance when CORS blocks it",
+    "Output both Data URI and raw Base64 in one pass",
+    "One-click copy and download as .txt",
+    "Bilingual Chinese and English interface",
+    "Runs entirely in the browser — images are never uploaded"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+</head>
+<body>
+
+<noscript>
+  <div class="noscript-note">
+    <b>本工具需要启用 JavaScript 才能运行。</b>
+    图片转 Base64 的全部转换都在你的浏览器内完成，因此必须启用 JavaScript，开启后刷新本页即可使用。
+    <span class="noscript-note__en">This tool requires JavaScript — all image-to-Base64 conversion runs locally in your browser. Please enable JavaScript and reload.</span>
+  </div>
+</noscript>
+
+<!-- ============================ NAV ============================ -->
+<header class="nav">
+  <div class="container nav__inner">
+    <div class="nav__brand">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+        <rect x="1" y="2.6" width="13" height="9.8" rx="1.6" stroke="#fff" stroke-width="1.3"/>
+        <circle cx="5.2" cy="6" r="1.1" fill="#fff"/>
+        <path d="M2 11L5.6 7.6L8 10L9.8 8.3L13 11.2" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span data-i18n="brand">Base64 Studio</span>
+    </div>
+    <div class="nav__spacer"></div>
+    <nav class="lang" aria-label="Language / 语言">
+      <a class="lang__btn" data-lang="zh" href="/" hreflang="zh-CN">中文</a>
+      <a class="lang__btn" data-lang="en" href="/en/" hreflang="en" aria-current="true">EN</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="container">
+    <h1 data-i18n="heroTitle">Image to Base64</h1>
+    <p data-i18n="heroSubtitle">Local or online images, converted to Base64 and Data URI in one click — everything runs in your browser, nothing is uploaded.</p>
+    <div class="hero__actions">
+      <button type="button" class="btn btn--primary" id="heroPick" data-i18n="heroCtaPrimary">Paste an image or press Ctrl+V</button>
+      <button type="button" class="btn btn--ghost" id="heroSeeFormats" data-i18n="heroCtaSecondary">See supported formats</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ WORKSPACE ============================ -->
+<main class="workspace">
+  <div class="container workspace__grid">
+
+    <!-- ---------- LEFT ---------- -->
+    <div class="col">
+
+      <!-- Upload card -->
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title" data-i18n="uploadTitle">Choose an image</h2>
+          <span class="card__meta" id="uploadCount" data-i18n="uploadCountZero">0 files</span>
+        </div>
+
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-describedby="dropHint">
+          <div class="dropzone__icon">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <rect x="3" y="7" width="38" height="30" rx="4" stroke="currentColor" stroke-width="2"/>
+              <circle cx="15" cy="17" r="3" stroke="currentColor" stroke-width="2"/>
+              <path d="M6 33L17 22L25 30L31 24L38 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="dropzone__title" data-i18n="dropTitle">Drag an image here, or click to browse</div>
+          <div class="dropzone__hint" id="dropHint" data-i18n="dropHint">Supports JPG · PNG · GIF · WebP · SVG, or paste with Ctrl+V</div>
+          <button type="button" class="btn btn--primary btn--sm dropzone__cta" id="pickBtn" data-i18n="pickButton">Click to choose a file</button>
+        </div>
+
+        <input type="file" id="fileInput" accept="image/*,.svg" multiple hidden />
+
+        <div class="urlrow">
+          <input type="url" class="input" id="urlInput" data-i18n-placeholder="urlPlaceholder"
+                 placeholder="Paste an image URL: https://example.com/pic.png" />
+          <button type="button" class="btn btn--dark" id="loadUrlBtn" data-i18n="loadButton">Load</button>
+        </div>
+        <p class="url-note" data-i18n="urlNote">Note: online images must allow cross-origin reads. If it fails due to CORS, download the image and use local upload instead.</p>
+
+        <div class="alert alert--error" id="alertBox" hidden>
+          <span class="alert__icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6.6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 5V8.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="8" cy="11" r=".9" fill="currentColor"/>
+            </svg>
+          </span>
+          <div class="alert__body">
+            <div class="alert__title" id="alertTitle"></div>
+            <div class="alert__desc" id="alertDesc"></div>
+          </div>
+          <button type="button" class="alert__close" id="alertClose" aria-label="Close">&times;</button>
+        </div>
+      </section>
+
+      <!-- Result card -->
+      <section class="card" id="resultCard">
+        <div class="card__head">
+          <h2 class="card__title" data-i18n="resultTitle">Conversion result</h2>
+          <span class="badge" id="resultBadge"><span data-i18n="badgeIdle">Waiting for an image</span></span>
+        </div>
+
+        <!-- meta strip -->
+        <div class="metastrip" id="metaStrip" hidden>
+          <div class="metastrip__thumb"><img id="metaThumb" alt="" /></div>
+          <div class="metastrip__name">
+            <b id="metaName">—</b>
+            <span id="metaDims">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat__k" data-i18n="statOriginal">Original size</span>
+            <span class="stat__v" id="statOriginal">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat__k" data-i18n="statBase64">Base64 text size</span>
+            <span class="stat__v stat__v--accent" id="statBase64">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat__k" data-i18n="statIncrease">Size increase</span>
+            <span class="stat__v" id="statIncrease">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat__k" data-i18n="statFormat">Format</span>
+            <span class="stat__v" id="statFormat">—</span>
+          </div>
+        </div>
+
+        <!-- tabs -->
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab" role="tab" id="tabUri" aria-selected="true" data-mode="uri" data-i18n="tabDataUri">Data URI</button>
+          <button type="button" class="tab" role="tab" id="tabRaw" aria-selected="false" data-mode="raw" data-i18n="tabRawBase64">Raw Base64</button>
+          <span class="tabs__spacer"></span>
+          <span class="tabs__meta" id="textLength"></span>
+        </div>
+
+        <div class="codebox codebox--empty" id="codebox">
+          <pre id="codeText" data-i18n="codePlaceholder">Pick or drop an image and the converted result will appear here…</pre>
+        </div>
+
+        <div class="result__actions">
+          <button type="button" class="btn btn--primary btn--sm" id="copyBtn" disabled>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="5.5" y="5.5" width="8" height="9" rx="1.8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10.5 3.5H4.3C3.6 3.5 3 4.1 3 4.8V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span data-i18n="copyButton">Copy</span>
+          </button>
+          <button type="button" class="btn btn--ghost btn--sm" id="downloadBtn" disabled>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 2.5V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M4.8 7.2L8 10.4L11.2 7.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2.8 13.2H13.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span id="downloadLabel" data-i18n="downloadButton">Download .txt</span>
+          </button>
+          <span class="result__note" data-i18n="resultNote">You get clear feedback on both success and failure</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ---------- RIGHT ---------- -->
+    <aside class="col">
+
+      <section class="card" id="formats">
+        <h2 class="card__title card__title--sm" style="margin-bottom:14px" data-i18n="formatsTitle">Supported image formats</h2>
+        <div class="chips">
+          <span class="chip">JPG</span>
+          <span class="chip">JPEG</span>
+          <span class="chip">PNG</span>
+          <span class="chip">GIF</span>
+          <span class="chip">WebP</span>
+          <span class="chip">BMP</span>
+          <span class="chip">SVG</span>
+          <span class="chip">ICO</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title card__title--sm" style="margin-bottom:14px" data-i18n="limitsTitle">Limits and boundaries</h2>
+        <ul class="bullets">
+          <li><span data-i18n="limitSingle">Maximum <b>10 MB</b> per file — larger files are rejected with a notice.</span></li>
+          <li><span data-i18n="limitBatch">Multiple images are supported; copy or download each entry individually.</span></li>
+          <li><span data-i18n="limitCors">Online images blocked by CORS cannot be read — download them and upload locally.</span></li>
+          <li><span data-i18n="limitBlocked">Conversion happens entirely in local memory; nothing is uploaded.</span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <div class="card__head" style="margin-bottom:12px">
+          <h2 class="card__title card__title--sm" data-i18n="listTitle">Result list</h2>
+          <button type="button" class="linkish" id="clearAllBtn" data-i18n="clearAll">Clear all</button>
+        </div>
+        <div class="list" id="resultList"></div>
+        <div class="empty" id="listEmpty" data-i18n="listEmpty">No conversions yet</div>
+      </section>
+
+      <section class="privacy" id="privacy">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M10 1.8L3.6 4.4V9.6C3.6 14 6.4 17.2 10 18.2C13.6 17.2 16.4 14 16.4 9.6V4.4L10 1.8Z" stroke="#2997ff" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M7.4 9.8L9.3 11.7L12.8 8" stroke="#2997ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <b data-i18n="privacyTitle">Converted locally — images never leave this device</b>
+          <p data-i18n="privacyDesc">Every conversion happens in browser memory. No image is sent to any server.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <span data-i18n="footerCopy">Base64 Studio · a pure front-end tool, no sign-up required</span>
+    <span>
+      <a href="#privacy" id="footerPrivacy" data-i18n="footerPrivacy">Privacy</a>
+      &nbsp;·&nbsp;
+      <a href="#formats" id="footerFormats" data-i18n="footerFormats">Formats</a>
+    </span>
+  </div>
+</footer>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+     1. i18n
+     ============================================================ */
+  var I18N = {
+    zh: {
+      pageTitle: "图片转 Base64 在线工具 - Data URI 与纯 Base64 互转",
+      brand: "Base64 Studio",
+      heroTitle: "图片转 Base64",
+      heroSubtitle: "本地或在线图片，一键生成 Base64 与 Data URI —— 全程在浏览器本地完成，图片不会上传服务器。",
+      heroCtaPrimary: "粘贴图片或按 Ctrl+V",
+      heroCtaSecondary: "查看支持的格式",
+
+      uploadTitle: "选择图片",
+      uploadCountZero: "0 张",
+      uploadCount: "{n} 张",
+      uploadCountSelected: "已选 {n} 张 · 共 {size}",
+      dropTitle: "拖拽图片到此处，或点击选择文件",
+      dropHint: "支持 JPG · PNG · GIF · WebP · SVG，也可直接 Ctrl+V 粘贴",
+      dropTitleActive: "松开鼠标即可添加图片",
+      pickButton: "点击选择图片",
+      urlPlaceholder: "粘贴在线图片地址 https://example.com/pic.png",
+      loadButton: "加载",
+      loadingButton: "加载中…",
+      urlNote: "提示：在线图片需目标站点允许跨域读取；若因 CORS 限制失败，请先下载图片再改用本地上传。",
+
+      resultTitle: "转换结果",
+      badgeIdle: "等待选择图片",
+      badgeDone: "转换完成",
+      badgeError: "转换失败",
+      badgeBusy: "转换中…",
+      statOriginal: "原始大小",
+      statBase64: "Base64 文本体积",
+      statIncrease: "体积增幅",
+      statFormat: "格式",
+      tabDataUri: "Data URI",
+      tabRawBase64: "纯 Base64",
+      codePlaceholder: "选择或拖入图片后，这里会显示转换结果…",
+      charCount: "{n} 字符",
+      copyButton: "复 制",
+      copiedButton: "已复制",
+      downloadButton: "下载 .txt",
+      resultNote: "复制成功或失败都会有明确提示",
+
+      formatsTitle: "支持的图片格式",
+      limitsTitle: "使用限制与边界",
+      limitSingle: "单张图片上限 <b>10 MB</b>，超出后给出提示并拒绝转换。",
+      limitBatch: "支持多张图片批量处理，列表可逐张复制与下载。",
+      limitCors: "在线图片受跨域限制时无法读取，请下载后改用本地上传。",
+      limitBlocked: "转换全程在本地内存完成，无任何数据上传。",
+
+      listTitle: "结果列表",
+      clearAll: "全部清空",
+      listEmpty: "还没有转换记录",
+      rowCopy: "复制",
+      rowDownload: "下载",
+      rowRemove: "移除",
+
+      privacyTitle: "本地转换，图片不出本机",
+      privacyDesc: "所有转换均在浏览器内存中完成，图片不会上传至任何服务器。",
+      footerCopy: "Base64 Studio · 纯前端工具，无需注册",
+      footerPrivacy: "隐私说明",
+      footerFormats: "格式支持",
+
+      errNoFile: "未选择文件",
+      errNoFileDesc: "请先选择、拖入或粘贴一张图片。",
+      errNotImage: "不支持的文件类型",
+      errNotImageDesc: "「{name}」不是可识别的图片文件，请选择 JPG、PNG、GIF、WebP 或 SVG。",
+      errTooLarge: "文件过大",
+      errTooLargeDesc: "「{name}」大小为 {size}，超过单张 {limit} 的上限，已跳过。",
+      errUrlEmpty: "请输入图片地址",
+      errUrlEmptyDesc: "地址不能为空，请粘贴一个以 http:// 或 https:// 开头的图片链接。",
+      errUrlInvalid: "地址格式无效",
+      errUrlInvalidDesc: "「{url}」不是合法的图片地址，请检查后重试。",
+      errUrlLoad: "在线图片加载失败",
+      errUrlLoadDesc: "无法读取该图片，可能地址已失效、不是图片资源，或该站点禁止跨域（CORS）访问。请下载图片后改用本地上传。",
+      errUrlType: "该地址不是图片资源",
+      errUrlTypeDesc: "服务器返回的内容类型为 {type}，不是可识别的图片。",
+      errRead: "文件读取失败",
+      errReadDesc: "读取「{name}」时发生错误，请重试或更换文件。",
+      errCanvas: "图片解析失败",
+      errCanvasDesc: "「{name}」无法被浏览器解码，文件可能已损坏。",
+      errCopy: "复制失败",
+      errCopyDesc: "浏览器拒绝了剪贴板访问，请手动选中文本复制，或改用「下载」按钮。",
+      errCopyFallback: "已为你选中文本",
+      errCopyFallbackDesc: "剪贴板不可用，文本已自动选中，请按 Ctrl+C 复制。",
+
+      okCopy: "已复制{label}到剪贴板",
+      okDownload: "已开始下载 {name}",
+      okLoaded: "已从在线地址加载图片",
+      okAdded: "已添加 {n} 张图片",
+      okSkipped: "已添加 {n} 张，另有 {m} 张被跳过",
+      okCleared: "已清空全部记录",
+      okRemoved: "已移除该条记录",
+
+      labelUri: "Data URI",
+      labelRaw: "纯 Base64",
+      clipboardUnavailable: "当前环境不支持剪贴板 API",
+      unitBytes: "B", unitKB: "KB", unitMB: "MB",
+      corsNote: "若在线图片因跨域限制无法读取，页面会给出提示，请下载后改用本地上传。"
+    },
+
+    en: {
+      pageTitle: "Image to Base64 Converter - Data URI & Raw Base64",
+      brand: "Base64 Studio",
+      heroTitle: "Image to Base64",
+      heroSubtitle: "Local or online images, converted to Base64 and Data URI in one click — everything runs in your browser, nothing is uploaded.",
+      heroCtaPrimary: "Paste an image or press Ctrl+V",
+      heroCtaSecondary: "See supported formats",
+
+      uploadTitle: "Choose an image",
+      uploadCountZero: "0 files",
+      uploadCount: "{n} files",
+      uploadCountSelected: "{n} selected · {size} total",
+      dropTitle: "Drag an image here, or click to browse",
+      dropHint: "Supports JPG · PNG · GIF · WebP · SVG, or paste with Ctrl+V",
+      dropTitleActive: "Release to add your image",
+      pickButton: "Click to choose a file",
+      urlPlaceholder: "Paste an image URL: https://example.com/pic.png",
+      loadButton: "Load",
+      loadingButton: "Loading…",
+      urlNote: "Note: online images must allow cross-origin reads. If it fails due to CORS, download the image and use local upload instead.",
+
+      resultTitle: "Conversion result",
+      badgeIdle: "Waiting for an image",
+      badgeDone: "Converted",
+      badgeError: "Conversion failed",
+      badgeBusy: "Converting…",
+      statOriginal: "Original size",
+      statBase64: "Base64 text size",
+      statIncrease: "Size increase",
+      statFormat: "Format",
+      tabDataUri: "Data URI",
+      tabRawBase64: "Raw Base64",
+      codePlaceholder: "Pick or drop an image and the converted result will appear here…",
+      charCount: "{n} characters",
+      copyButton: "Copy",
+      copiedButton: "Copied",
+      downloadButton: "Download .txt",
+      resultNote: "You get clear feedback on both success and failure",
+
+      formatsTitle: "Supported image formats",
+      limitsTitle: "Limits and boundaries",
+      limitSingle: "Maximum <b>10 MB</b> per file — larger files are rejected with a notice.",
+      limitBatch: "Multiple images are supported; copy or download each entry individually.",
+      limitCors: "Online images blocked by CORS cannot be read — download them and upload locally.",
+      limitBlocked: "Conversion happens entirely in local memory; nothing is uploaded.",
+
+      listTitle: "Result list",
+      clearAll: "Clear all",
+      listEmpty: "No conversions yet",
+      rowCopy: "Copy",
+      rowDownload: "Download",
+      rowRemove: "Remove",
+
+      privacyTitle: "Converted locally — images never leave this device",
+      privacyDesc: "Every conversion happens in browser memory. No image is sent to any server.",
+      footerCopy: "Base64 Studio · a pure front-end tool, no sign-up required",
+      footerPrivacy: "Privacy",
+      footerFormats: "Formats",
+
+      errNoFile: "No file selected",
+      errNoFileDesc: "Please choose, drop, or paste an image first.",
+      errNotImage: "Unsupported file type",
+      errNotImageDesc: "“{name}” is not a recognised image. Please use JPG, PNG, GIF, WebP, or SVG.",
+      errTooLarge: "File too large",
+      errTooLargeDesc: "“{name}” is {size}, above the {limit} per-file limit, and was skipped.",
+      errUrlEmpty: "Enter an image URL",
+      errUrlEmptyDesc: "The field is empty. Paste a link that starts with http:// or https://.",
+      errUrlInvalid: "Invalid URL",
+      errUrlInvalidDesc: "“{url}” is not a valid image URL. Please check it and try again.",
+      errUrlLoad: "Could not load the online image",
+      errUrlLoadDesc: "The image could not be read — the URL may be dead, may not point to an image, or the site may block cross-origin (CORS) access. Download it and upload locally instead.",
+      errUrlType: "That URL is not an image",
+      errUrlTypeDesc: "The server returned a content type of {type}, which is not a recognised image.",
+      errRead: "Could not read the file",
+      errReadDesc: "Something went wrong reading “{name}”. Please try again or use another file.",
+      errCanvas: "Could not decode the image",
+      errCanvasDesc: "“{name}” could not be decoded by the browser; the file may be corrupted.",
+      errCopy: "Copy failed",
+      errCopyDesc: "The browser denied clipboard access. Select the text manually, or use the Download button instead.",
+      errCopyFallback: "Text selected for you",
+      errCopyFallbackDesc: "Clipboard access is unavailable, so the text was selected — press Ctrl+C to copy.",
+
+      okCopy: "Copied {label} to clipboard",
+      okDownload: "Download started for {name}",
+      okLoaded: "Image loaded from the online URL",
+      okAdded: "Added {n} image(s)",
+      okSkipped: "Added {n}, skipped {m}",
+      okCleared: "All records cleared",
+      okRemoved: "Record removed",
+
+      labelUri: "Data URI",
+      labelRaw: "Raw Base64",
+      clipboardUnavailable: "Clipboard API is not available in this environment",
+      unitBytes: "B", unitKB: "KB", unitMB: "MB",
+      corsNote: "If an online image is blocked by CORS, the page will tell you — download it and upload locally instead."
+    }
+  };
+
+  // The language of THIS page is fixed at build time via html[data-lang]:
+  // "/" serves zh-CN, "/en/" serves en. The switcher performs real navigation
+  // between those two URLs, so no mutable runtime language state exists.
+  var currentLang = document.documentElement.getAttribute("data-lang") === "en" ? "en" : "zh";
+
+  function t(key, vars) {
+    var dict = I18N[currentLang] || I18N.zh;
+    var s = dict[key];
+    if (s === undefined) s = (I18N.zh[key] !== undefined ? I18N.zh[key] : key);
+    if (vars) {
+      Object.keys(vars).forEach(function (k) {
+        s = s.split("{" + k + "}").join(String(vars[k]));
+      });
+    }
+    return s;
+  }
+
+  /* ============================================================
+     2. DOM refs
+     ============================================================ */
+  var $ = function (id) { return document.getElementById(id); };
+
+  var els = {
+    dropzone: $("dropzone"),
+    fileInput: $("fileInput"),
+    pickBtn: $("pickBtn"),
+    heroPick: $("heroPick"),
+    heroSeeFormats: $("heroSeeFormats"),
+    urlInput: $("urlInput"),
+    loadUrlBtn: $("loadUrlBtn"),
+    uploadCount: $("uploadCount"),
+    alertBox: $("alertBox"),
+    alertTitle: $("alertTitle"),
+    alertDesc: $("alertDesc"),
+    alertClose: $("alertClose"),
+
+    resultBadge: $("resultBadge"),
+    metaStrip: $("metaStrip"),
+    metaThumb: $("metaThumb"),
+    metaName: $("metaName"),
+    metaDims: $("metaDims"),
+    statOriginal: $("statOriginal"),
+    statBase64: $("statBase64"),
+    statIncrease: $("statIncrease"),
+    statFormat: $("statFormat"),
+
+    tabUri: $("tabUri"),
+    tabRaw: $("tabRaw"),
+    textLength: $("textLength"),
+    codebox: $("codebox"),
+    codeText: $("codeText"),
+    copyBtn: $("copyBtn"),
+    downloadBtn: $("downloadBtn"),
+    downloadLabel: $("downloadLabel"),
+
+    resultList: $("resultList"),
+    listEmpty: $("listEmpty"),
+    clearAllBtn: $("clearAllBtn"),
+
+    toasts: $("toasts"),
+    footerPrivacy: $("footerPrivacy"),
+    footerFormats: $("footerFormats")
+  };
+
+  /* ============================================================
+     3. Config
+     ============================================================ */
+  var MAX_BYTES = 10 * 1024 * 1024;               // 10 MB
+  var MAX_FILES_PER_DROP = 20;
+  var ALLOWED_MIME = /^image\/(png|jpeg|jpg|gif|webp|bmp|x-icon|vnd\.microsoft\.icon|svg\+xml)$/i;
+  var ALLOWED_EXT = /\.(png|jpe?g|gif|webp|bmp|ico|svg)$/i;
+  var RASTER_REENCODE = /image\/(png|jpeg|jpg|webp|bmp|x-icon|vnd\.microsoft\.icon)/i;
+
+  var MIME_EXT = {
+    "image/png": "png", "image/jpeg": "jpg", "image/jpg": "jpg",
+    "image/gif": "gif", "image/webp": "webp", "image/bmp": "bmp",
+    "image/svg+xml": "svg", "image/x-icon": "ico", "image/vnd.microsoft.icon": "ico"
+  };
+
+  /* ============================================================
+     4. Utilities
+     ============================================================ */
+  function formatBytes(n) {
+    if (!isFinite(n) || n < 0) return "—";
+    if (n < 1024) return n + " " + t("unitBytes");
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " " + t("unitKB");
+    return (n / (1024 * 1024)).toFixed(2) + " " + t("unitMB");
+  }
+
+  function formatInt(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function mimeOf(file) {
+    if (file.type) return file.type.toLowerCase();
+    var m = ALLOWED_EXT.exec(file.name || "");
+    if (!m) return "";
+    var ext = m[1].toLowerCase();
+    if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+    if (ext === "svg") return "image/svg+xml";
+    return "image/" + ext;
+  }
+
+  function isProbablyImage(file) {
+    var mime = mimeOf(file);
+    if (ALLOWED_MIME.test(mime)) return true;
+    return ALLOWED_EXT.test(file.name || "");
+  }
+
+  function cleanFileName(name) {
+    var base = String(name || "image").replace(/\.[^.]+$/, "");
+    base = base.replace(/[/\\:*?"<>|]/g, "_").replace(/\s+/g, " ").trim();
+    return base || "image";
+  }
+
+  function readAsText(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () { resolve(String(fr.result)); };
+      fr.onerror = function () { reject(fr.error || new Error("read error")); };
+      fr.readAsText(file);
+    });
+  }
+
+  function loadImageElement(src) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error("image decode error")); };
+      img.src = src;
+    });
+  }
+
+  /* ============================================================
+     5. Toasts
+     ============================================================ */
+  var TOAST_ICONS = {
+    ok: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="#5ed07e" stroke-width="1.5"/><path d="M5.2 8.3L7.1 10.2L10.9 6" stroke="#5ed07e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    err: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="#ff6b5e" stroke-width="1.5"/><path d="M8 4.8V8.6" stroke="#ff6b5e" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r=".9" fill="#ff6b5e"/></svg>',
+    info: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.6" stroke="#2997ff" stroke-width="1.5"/><path d="M8 7.2V11" stroke="#2997ff" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="5" r=".9" fill="#2997ff"/></svg>'
+  };
+
+  function toast(message, kind) {
+    if (!message) return;
+    var type = kind || "info";
+    var node = document.createElement("div");
+    node.className = "toast";
+    node.setAttribute("role", type === "err" ? "alert" : "status");
+    node.innerHTML = (TOAST_ICONS[type] || TOAST_ICONS.info) +
+      '<span class="toast__text"></span>';
+    node.querySelector(".toast__text").textContent = message;
+    els.toasts.appendChild(node);
+
+    var LIMIT = 4;
+    while (els.toasts.children.length > LIMIT) {
+      els.toasts.removeChild(els.toasts.firstChild);
+    }
+
+    window.setTimeout(function () {
+      node.classList.add("toast--out");
+      window.setTimeout(function () {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }, 220);
+    }, 3200);
+  }
+
+  /* ============================================================
+     6. Inline alert
+     ============================================================ */
+  function showAlert(title, desc, kind) {
+    els.alertBox.className = "alert alert--" + (kind || "error");
+    els.alertTitle.textContent = title || "";
+    els.alertDesc.textContent = desc || "";
+    els.alertBox.hidden = false;
+  }
+  function hideAlert() { els.alertBox.hidden = true; }
+  els.alertClose.addEventListener("click", hideAlert);
+
+  /* ============================================================
+     7. State
+     ============================================================ */
+  var active = null;      // currently previewed record
+  var records = [];       // all converted records
+  var mode = "uri";       // "uri" | "raw"
+  var seq = 0;
+  var loadingUrl = false;
+
+  function currentText() {
+    if (!active) return "";
+    return mode === "uri" ? active.dataUri : active.raw;
+  }
+
+  /* ============================================================
+     8. Conversion core
+     ============================================================ */
+  // Build a record from raw bytes.
+  // - SVG: read as text and reuse the original markup (no re-encoding).
+  // - Raster that the browser can re-encode to PNG: re-encode so the
+  //   Data URI mime type always matches the actual payload.
+  // - Anything else (e.g. ICO): keep the original bytes, but the text is
+  //   derived from those same bytes so the Base64 stays valid.
+  function buildRecord(opts) {
+    // opts: { name, mime, size, byteLength, rawBase64, previewUrl, width, height }
+    var dataUri = "data:" + opts.mime + ";base64," + opts.rawBase64;
+    var textBytes = dataUri.length;
+    var increase = opts.size > 0 ? ((textBytes - opts.size) / opts.size) * 100 : 0;
+
+    return {
+      id: "rec-" + (++seq),
+      name: opts.name,
+      mime: opts.mime,
+      ext: (MIME_EXT[opts.mime] || "png").toUpperCase(),
+      fileSize: opts.size,
+      textBytes: textBytes,
+      increase: increase,
+      rawBase64: opts.rawBase64,
+      dataUri: dataUri,
+      previewUrl: opts.previewUrl || dataUri,
+      width: opts.width || 0,
+      height: opts.height || 0,
+      source: opts.source || "local"
+    };
+  }
+
+  function arrayBufferToBase64(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var CHUNK = 0x8000;               // avoid call-stack overflow on large files
+    var parts = [];
+    for (var i = 0; i < bytes.length; i += CHUNK) {
+      parts.push(String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK)));
+    }
+    return btoa(parts.join(""));
+  }
+
+  function detectRasterMime(buffer, fallback) {
+    var b = new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 12));
+    if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "image/png";
+    if (b[0] === 0xff && b[1] === 0xd8) return "image/jpeg";
+    if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return "image/gif";
+    if (b[0] === 0x42 && b[1] === 0x4d) return "image/bmp";
+    if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+        b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "image/webp";
+    return fallback || "image/png";
+  }
+
+  function convertFile(file) {
+    return new Promise(function (resolve, reject) {
+      var mime = mimeOf(file) || "image/png";
+      var isSvg = mime === "image/svg+xml";
+
+      if (isSvg) {
+        readAsText(file).then(function (text) {
+          var payload = text.replace(/^\uFEFF/, "");
+          var raw = btoa(unescape(encodeURIComponent(payload)));
+          var size = new Blob([payload]).size;
+          var preview = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(payload);
+
+          loadImageElement(preview).then(function (img) {
+            resolve(buildRecord({
+              name: file.name, mime: "image/svg+xml", size: size,
+              rawBase64: raw, previewUrl: preview,
+              width: img.naturalWidth || 0, height: img.naturalHeight || 0,
+              source: "local"
+            }));
+          }).catch(function () {
+            resolve(buildRecord({
+              name: file.name, mime: "image/svg+xml", size: size,
+              rawBase64: raw, previewUrl: preview, source: "local"
+            }));
+          });
+        }).catch(function () { reject(new Error("read")); });
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error("read")); };
+      reader.onload = function () {
+        var buffer = reader.result;
+        var realMime = detectRasterMime(buffer, mime);
+
+        var readMeta = new Promise(function (res) {
+          var fr = new FileReader();
+          fr.onload = function () {
+            var im = new Image();
+            im.onload = function () { res({ w: im.naturalWidth || 0, h: im.naturalHeight || 0 }); };
+            im.onerror = function () { res({ w: 0, h: 0 }); };
+            im.src = String(fr.result);
+          };
+          fr.onerror = function () { res({ w: 0, h: 0 }); };
+          fr.readAsDataURL(file);
+        });
+
+        readMeta.then(function (meta) {
+          var useOriginal = true;
+          var encoded = null;
+
+          if (RASTER_REENCODE.test(realMime)) {
+            try {
+              var bytes = new Uint8Array(buffer);
+              var bin = "";
+              var CHUNK = 0x8000;
+              for (var i = 0; i < bytes.length; i += CHUNK) {
+                bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+              }
+              encoded = btoa(bin);
+              useOriginal = false;
+            } catch (e) {
+              encoded = null;
+              useOriginal = true;
+            }
+          }
+
+          var raw = useOriginal ? arrayBufferToBase64(buffer) : encoded;
+          resolve(buildRecord({
+            name: file.name,
+            mime: realMime,
+            size: file.size,
+            rawBase64: raw,
+            previewUrl: null,
+            width: meta.w, height: meta.h,
+            source: "local"
+          }));
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  /* ============================================================
+     9. Online image loading (with CORS handling)
+     ============================================================ */
+  function validateUrl(input) {
+    var value = String(input || "").trim();
+    if (!value) return { ok: false, reason: "empty" };
+    var withProto = value;
+    if (!/^https?:\/\//i.test(withProto)) {
+      if (/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(value)) {
+        withProto = "https://" + value;
+      } else {
+        return { ok: false, reason: "invalid", value: value };
+      }
+    }
+    try {
+      var u = new URL(withProto);
+      if (!u.hostname || u.hostname.indexOf(".") === -1) {
+        return { ok: false, reason: "invalid", value: value };
+      }
+      return { ok: true, url: u.href };
+    } catch (e) {
+      return { ok: false, reason: "invalid", value: value };
+    }
+  }
+
+  // 1) Try fetch() + arrayBuffer: gives byte-accurate size and works when
+  //    the server sends permissive CORS headers.
+  function fetchBytes(url) {
+    return fetch(url, { mode: "cors", credentials: "omit", cache: "no-cache" })
+      .then(function (res) {
+        if (!res.ok) {
+          var err = new Error("http " + res.status);
+          err.code = "http";
+          err.status = res.status;
+          throw err;
+        }
+        var ct = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+        return res.arrayBuffer().then(function (buf) { return { buffer: buf, contentType: ct }; });
+      });
+  }
+
+  // 2) Fallback: load through <img> + canvas. Works only when the host allows
+  //    cross-origin reads; a tainted canvas throws a SecurityError, which is
+  //    exactly the CORS case we surface to the user.
+  function loadViaCanvas(url) {
+    return loadImageElement(url).then(function (img) {
+      var w = img.naturalWidth, h = img.naturalHeight;
+      if (!w || !h) throw new Error("empty image");
+
+      var canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      var dataUri;
+      try {
+        dataUri = canvas.toDataURL("image/png");
+      } catch (e) {
+        var sec = new Error("tainted canvas");
+        sec.code = "cors";
+        throw sec;
+      }
+      var idx = dataUri.indexOf(",");
+      var raw = idx >= 0 ? dataUri.slice(idx + 1) : "";
+      var approxSize = Math.round(raw.length * 3 / 4);
+
+      return {
+        rawBase64: raw,
+        mime: "image/png",
+        size: approxSize,
+        previewUrl: dataUri,
+        width: w,
+        height: h,
+        reencoded: true
+      };
+    }).catch(function (e) {
+      if (e && e.code === "cors") throw e;
+      var err = new Error("img load failed");
+      err.code = "imgload";
+      throw err;
+    });
+  }
+
+  function loadRemoteImage(rawUrl) {
+    var check = validateUrl(rawUrl);
+    if (!check.ok) {
+      if (check.reason === "empty") {
+        showAlert(t("errUrlEmpty"), t("errUrlEmptyDesc"), "error");
+        toast(t("errUrlEmpty"), "err");
+      } else {
+        showAlert(t("errUrlInvalid", { url: check.value }), t("errUrlInvalidDesc", { url: check.value }), "error");
+        toast(t("errUrlInvalid", { url: check.value }), "err");
+      }
+      els.urlInput.classList.add("input--invalid");
+      els.urlInput.focus();
+      return Promise.resolve(null);
+    }
+    els.urlInput.classList.remove("input--invalid");
+
+    var url = check.url;
+    var pretty = cleanUrlName(url);
+
+    return fetchBytes(url).then(function (r) {
+      var ct = r.contentType || "";
+      if (ct && ct.indexOf("image/") !== 0 && ct.indexOf("text/xml") !== 0 && ct.indexOf("application/xml") !== 0) {
+        var err = new Error("not image");
+        err.code = "type";
+        err.contentType = ct;
+        throw err;
+      }
+      var buf = r.buffer;
+      var mime = detectRasterMime(buf, ct && ct.indexOf("image/") === 0 ? ct : "image/png");
+      var raw = arrayBufferToBase64(buf);
+
+      var rec = buildRecord({
+        name: pretty,
+        mime: mime,
+        size: buf.byteLength,
+        rawBase64: raw,
+        previewUrl: null,
+        source: "url"
+      });
+
+      return loadImageElement(rec.dataUri).then(function (img) {
+        rec.width = img.naturalWidth || 0;
+        rec.height = img.naturalHeight || 0;
+        return rec;
+      }).catch(function () { return rec; });
+    }).catch(function (e) {
+      if (e && e.code === "http") {
+        var err = new Error("http");
+        err.code = "cors";
+        throw err;
+      }
+      if (e && (e.code === "type" || e.code === "cors")) throw e;
+      // fetch blocked by CORS at the network layer → try the <img> + canvas path
+      return loadViaCanvas(url).then(function (r) {
+        var rec = buildRecord({
+          name: pretty,
+          mime: r.mime,
+          size: r.size,
+          rawBase64: r.rawBase64,
+          previewUrl: r.previewUrl,
+          width: r.width,
+          height: r.height,
+          source: "url"
+        });
+        rec.reencoded = true;
+        return rec;
+      });
+    }).catch(function (e) {
+      if (e && e.code === "type") {
+        showAlert(t("errUrlType"), t("errUrlTypeDesc", { type: e.contentType || "unknown" }), "error");
+        toast(t("errUrlType"), "err");
+      } else {
+        showAlert(t("errUrlLoad"), t("errUrlLoadDesc"), "error");
+        toast(t("errUrlLoad"), "err");
+      }
+      return null;
+    });
+  }
+
+  function cleanUrlName(url) {
+    try {
+      var u = new URL(url);
+      var last = u.pathname.split("/").filter(Boolean).pop() || u.hostname;
+      var name = last.indexOf(".") > -1 ? last : last + ".png";
+      return decodeURIComponent(name).slice(0, 80);
+    } catch (e) {
+      return "remote-image.png";
+    }
+  }
+
+  /* ============================================================
+     10. Adding / rendering
+     ============================================================ */
+  function setBusy(busy) {
+    els.resultBadge.className = "badge" + (busy ? " badge--busy" : "");
+    els.resultBadge.innerHTML = '<span></span>';
+    els.resultBadge.firstChild.textContent = busy ? t("badgeBusy") : t("badgeIdle");
+  }
+
+  function renderActive() {
+    if (!active) {
+      els.metaStrip.hidden = true;
+      els.codebox.classList.add("codebox--empty");
+      els.codeText.textContent = t("codePlaceholder");
+      els.codeText.removeAttribute("data-i18n");
+      els.textLength.textContent = "";
+      els.copyBtn.disabled = true;
+      els.downloadBtn.disabled = true;
+      return;
+    }
+
+    els.metaStrip.hidden = false;
+    els.metaThumb.src = active.previewUrl;
+    els.metaThumb.alt = active.name;
+    els.metaName.textContent = active.name;
+    els.metaDims.textContent = (active.width && active.height)
+      ? active.width + " × " + active.height + " px · " + active.ext
+      : active.ext;
+    els.statOriginal.textContent = formatBytes(active.fileSize);
+    els.statBase64.textContent = formatBytes(active.textBytes);
+    els.statIncrease.textContent = (active.increase >= 0 ? "+" : "") + active.increase.toFixed(1) + "%";
+    els.statFormat.textContent = active.ext;
+
+    var text = currentText();
+    els.codebox.classList.remove("codebox--empty");
+    els.codeText.textContent = text;
+    els.textLength.textContent = t("charCount", { n: formatInt(text.length) });
+
+    els.copyBtn.disabled = false;
+    els.downloadBtn.disabled = false;
+
+    var ext = active.source === "url" ? "png" : (MIME_EXT[active.mime] || "png");
+    els.downloadLabel.textContent = currentLang === "zh"
+      ? "下载 ." + ext + " 文本"
+      : "Download ." + ext + " text";
+  }
+
+  function renderList() {
+    if (!records.length) {
+      els.resultList.innerHTML = "";
+      els.listEmpty.hidden = false;
+      return;
+    }
+    els.listEmpty.hidden = true;
+    var html = records.map(function (r) {
+      var info = formatBytes(r.fileSize) + " → " + formatBytes(r.textBytes) + " · " + r.ext;
+      return '' +
+        '<div class="item" data-id="' + r.id + '">' +
+          '<div class="item__thumb"><img src="' + r.previewUrl + '" alt="" /></div>' +
+          '<div class="item__meta">' +
+            '<div class="item__name">' + escapeHtml(r.name) + '</div>' +
+            '<div class="item__sub">' + info + '</div>' +
+          '</div>' +
+          '<div class="item__actions">' +
+            '<button type="button" class="btn btn--pearl" data-act="copy" data-i18n-title="rowCopy" title="' + t("rowCopy") + '">' + t("rowCopy") + '</button>' +
+            '<button type="button" class="btn btn--pearl" data-act="download" title="' + t("rowDownload") + '">' + t("rowDownload") + '</button>' +
+            '<button type="button" class="btn btn--pearl" data-act="remove" title="' + t("rowRemove") + '">' +
+              '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 2.5L9.5 9.5M9.5 2.5L2.5 9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+    }).join("");
+    els.resultList.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    });
+  }
+
+  function updateCount() {
+    if (!records.length) {
+      els.uploadCount.textContent = t("uploadCountZero");
+      return;
+    }
+    els.uploadCount.textContent = t("uploadCount", { n: records.length });
+  }
+
+  function addRecord(rec, opts) {
+    opts = opts || {};
+    records = [rec].concat(records);
+    if (records.length > 30) records = records.slice(0, 30);
+    active = rec;
+    els.resultBadge.className = "badge badge--ok";
+    els.resultBadge.innerHTML = '<span></span>';
+    els.resultBadge.firstChild.textContent = t("badgeDone");
+    renderActive();
+    renderList();
+    updateCount();
+    if (opts.toastMessage) toast(opts.toastMessage, "ok");
+  }
+
+  /* ============================================================
+     11. File intake
+     ============================================================ */
+  function handleFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList || []).slice(0, MAX_FILES_PER_DROP);
+    if (!files.length) {
+      showAlert(t("errNoFile"), t("errNoFileDesc"), "warn");
+      toast(t("errNoFile"), "err");
+      return;
+    }
+
+    var accepted = [];
+    var rejectedType = [];
+    var rejectedSize = [];
+
+    files.forEach(function (f) {
+      if (!isProbablyImage(f)) { rejectedType.push(f); return; }
+      if (f.size > MAX_BYTES) { rejectedSize.push(f); return; }
+      accepted.push(f);
+    });
+
+    if (!accepted.length) {
+      if (rejectedType.length) {
+        showAlert(t("errNotImage", { name: rejectedType[0].name }),
+          t("errNotImageDesc", { name: rejectedType[0].name }), "error");
+        toast(t("errNotImage", { name: rejectedType[0].name }), "err");
+      } else if (rejectedSize.length) {
+        showAlert(t("errTooLarge", { name: rejectedSize[0].name, size: formatBytes(rejectedSize[0].size) }),
+          t("errTooLargeDesc", {
+            name: rejectedSize[0].name,
+            size: formatBytes(rejectedSize[0].size),
+            limit: formatBytes(MAX_BYTES)
+          }), "error");
+        toast(t("errTooLarge", { name: rejectedSize[0].name }), "err");
+      }
+      return;
+    }
+
+    hideAlert();
+    setBusy(true);
+
+    var done = 0, ok = 0, failed = 0;
+
+    accepted.forEach(function (f) {
+      convertFile(f).then(function (rec) {
+        rec.source = "local";
+        records = [rec].concat(records);
+        if (!active) active = rec;
+        ok++;
+      }).catch(function (e) {
+        failed++;
+        var isDecode = String(e && e.message) === "image decode error";
+        showAlert(
+          isDecode ? t("errCanvas", { name: f.name }) : t("errRead", { name: f.name }),
+          isDecode ? t("errCanvasDesc", { name: f.name }) : t("errReadDesc", { name: f.name }),
+          "error"
+        );
+        toast(t("errRead", { name: f.name }), "err");
+      }).then(function () {
+        done++;
+        if (done === accepted.length) {
+          records = records.slice(0, 30);
+          if (ok && records.length) {
+            active = records[0];
+            els.resultBadge.className = "badge badge--ok";
+            els.resultBadge.innerHTML = '<span></span>';
+            els.resultBadge.firstChild.textContent = t("badgeDone");
+          }
+          renderActive();
+          renderList();
+          updateCount();
+
+          var skipped = rejectedType.length + rejectedSize.length;
+          if (skipped > 0) {
+            toast(t("okSkipped", { n: ok, m: skipped }), "info");
+          } else if (ok > 0) {
+            toast(t("okAdded", { n: ok }), "ok");
+          }
+          if (rejectedSize.length) {
+            showAlert(t("errTooLarge", { name: rejectedSize[0].name, size: formatBytes(rejectedSize[0].size) }),
+              t("errTooLargeDesc", {
+                name: rejectedSize[0].name,
+                size: formatBytes(rejectedSize[0].size),
+                limit: formatBytes(MAX_BYTES)
+              }), "error");
+          } else if (rejectedType.length) {
+            showAlert(t("errNotImage", { name: rejectedType[0].name }),
+              t("errNotImageDesc", { name: rejectedType[0].name }), "error");
+          }
+        }
+      });
+    });
+  }
+
+  /* ============================================================
+     12. Clipboard
+     ============================================================ */
+  function legacyCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "0";
+    ta.style.left = "0";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function selectFallback(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.top = "50%";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    window.setTimeout(function () {
+      if (ta.parentNode) ta.parentNode.removeChild(ta);
+    }, 8000);
+  }
+
+  function copyText(text, label) {
+    var finish = function (ok) {
+      if (ok) {
+        toast(t("okCopy", { label: label }), "ok");
+        var original = els.copyBtn.querySelector("span");
+        var prev = original.textContent;
+        original.textContent = t("copiedButton");
+        els.copyBtn.disabled = true;
+        window.setTimeout(function () {
+          original.textContent = prev;
+          els.copyBtn.disabled = false;
+        }, 1600);
+      } else {
+        selectFallback(text);
+        showAlert(t("errCopy"), t("errCopyDesc") + " " + t("errCopyFallbackDesc"), "error");
+        toast(t("errCopy"), "err");
+      }
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () {
+        finish(true);
+      }).catch(function () {
+        finish(legacyCopy(text));
+      });
+    } else {
+      finish(legacyCopy(text));
+    }
+  }
+
+  /* ============================================================
+     13. Download
+     ============================================================ */
+  function downloadText(text, baseName, suffix) {
+    var name = baseName + "." + (suffix || "base64") + ".txt";
+    var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    toast(t("okDownload", { name: name }), "ok");
+  }
+
+  /* ============================================================
+     14. Events
+     ============================================================ */
+  // --- language ---
+  function applyLanguage(lang) {
+    currentLang = I18N[lang] ? lang : "zh";
+
+    document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
+    document.title = t("pageTitle");
+
+    document.querySelectorAll("[data-i18n]").forEach(function (node) {
+      var key = node.getAttribute("data-i18n");
+      // Skip nodes whose content is dynamically managed
+      if (node === els.codeText && active) return;
+      if (node === els.resultBadge) return;
+      var html = t(key);
+      if (/<(b|strong|em|br)\b/i.test(html)) node.innerHTML = html;
+      else node.textContent = html;
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (node) {
+      node.setAttribute("placeholder", t(node.getAttribute("data-i18n-placeholder")));
+    });
+
+    document.querySelectorAll(".lang__btn").forEach(function (btn) {
+      if (btn.getAttribute("data-lang") === currentLang) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+    });
+
+    if (active) {
+      renderActive();
+      els.resultBadge.className = "badge badge--ok";
+      els.resultBadge.innerHTML = "<span></span>";
+      els.resultBadge.firstChild.textContent = t("badgeDone");
+    } else {
+      renderActive();
+    }
+    renderList();
+    updateCount();
+
+    // No localStorage write here: the URL is the source of truth for language,
+    // and a stored preference would drift out of sync with canonical/hreflang.
+
+    if (loadingUrl) els.loadUrlBtn.textContent = t("loadingButton");
+    else els.loadUrlBtn.textContent = t("loadButton");
+  }
+
+  // The switcher renders as real <a href> links (/ and /en/), so the browser
+  // performs a full navigation. That keeps the rendered language aligned with
+  // the URL that canonical + hreflang advertise, and gives crawlers a
+  // followable link to the other language version.
+
+  // --- file picking ---
+  function openPicker() { els.fileInput.click(); }
+
+  els.pickBtn.addEventListener("click", function (e) { e.stopPropagation(); openPicker(); });
+  els.dropzone.addEventListener("click", openPicker);
+  els.dropzone.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      openPicker();
+    }
+  });
+  els.heroPick.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    els.dropzone.focus();
+    toast(currentLang === "zh"
+      ? "按 Ctrl+V 粘贴剪贴板中的图片，或点击下方按钮选择文件"
+      : "Press Ctrl+V to paste an image, or use the button below to browse", "info");
+  });
+  els.heroSeeFormats.addEventListener("click", function () {
+    var el = document.querySelector(".chips");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  els.fileInput.addEventListener("change", function () {
+    handleFiles(els.fileInput.files);
+    els.fileInput.value = "";
+  });
+
+  // --- drag & drop ---
+  var dragDepth = 0;
+  function stop(e) { e.preventDefault(); e.stopPropagation(); }
+
+  ["dragenter", "dragover"].forEach(function (evt) {
+    document.addEventListener(evt, function (e) {
+      stop(e);
+      if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], "Files") > -1) {
+        dragDepth = evt === "dragenter" ? dragDepth + 1 : dragDepth;
+        els.dropzone.classList.add("is-dragover");
+      }
+    });
+  });
+  document.addEventListener("dragleave", function (e) {
+    stop(e);
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) els.dropzone.classList.remove("is-dragover");
+  });
+  document.addEventListener("drop", function (e) {
+    stop(e);
+    dragDepth = 0;
+    els.dropzone.classList.remove("is-dragover");
+    var dt = e.dataTransfer;
+    if (!dt) return;
+    if (dt.files && dt.files.length) {
+      handleFiles(dt.files);
+      return;
+    }
+    var html = dt.getData ? dt.getData("text/html") : "";
+    var plain = dt.getData ? dt.getData("text/plain") : "";
+    var match = /<img[^>]+src=["']([^"']+)["']/i.exec(html || "");
+    if (match) { els.urlInput.value = match[1]; doLoadUrl(); return; }
+    if (plain && /^https?:\/\//i.test(plain.trim())) {
+      els.urlInput.value = plain.trim();
+      doLoadUrl();
+    }
+  });
+
+  // --- paste ---
+  document.addEventListener("paste", function (e) {
+    var cd = e.clipboardData;
+    if (!cd) return;
+    var items = cd.items || [];
+    var files = [];
+
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.kind === "file" && /^image\//i.test(it.type)) {
+        var f = it.getAsFile();
+        if (f) {
+          if (!f.name || f.name === "image.png" || f.name === "blob") {
+            f = new File([f], "pasted-image" + (files.length ? "-" + (files.length + 1) : "") + "." +
+              (MIME_EXT[f.type] || "png"), { type: f.type });
+          }
+          files.push(f);
+        }
+      }
+    }
+
+    if (!files.length && cd.files && cd.files.length) {
+      files = Array.prototype.filter.call(cd.files, function (f) {
+        return /^image\//i.test(f.type);
+      });
+    }
+
+    if (files.length) {
+      e.preventDefault();
+      handleFiles(files);
+      return;
+    }
+
+    var text = (cd.getData ? cd.getData("text/plain") : "").trim();
+    if (text && /^https?:\/\/\S+$/i.test(text) && document.activeElement !== els.urlInput) {
+      els.urlInput.value = text;
+      doLoadUrl();
+    }
+  });
+
+  // --- URL loading ---
+  function doLoadUrl() {
+    if (loadingUrl) return;
+    var v = els.urlInput.value;
+    if (!String(v || "").trim()) {
+      showAlert(t("errUrlEmpty"), t("errUrlEmptyDesc"), "warn");
+      toast(t("errUrlEmpty"), "err");
+      els.urlInput.focus();
+      return;
+    }
+    loadingUrl = true;
+    els.loadUrlBtn.disabled = true;
+    els.loadUrlBtn.textContent = t("loadingButton");
+    hideAlert();
+
+    loadRemoteImage(v).then(function (rec) {
+      if (rec) {
+        addRecord(rec, { toastMessage: t("okLoaded") });
+      }
+    }).then(function () {
+      loadingUrl = false;
+      els.loadUrlBtn.disabled = false;
+      els.loadUrlBtn.textContent = t("loadButton");
+    });
+  }
+
+  els.loadUrlBtn.addEventListener("click", doLoadUrl);
+  els.urlInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); doLoadUrl(); }
+  });
+  els.urlInput.addEventListener("input", function () {
+    els.urlInput.classList.remove("input--invalid");
+  });
+
+  // --- tabs ---
+  document.querySelectorAll(".tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      mode = tab.getAttribute("data-mode");
+      document.querySelectorAll(".tab").forEach(function (x) {
+        x.setAttribute("aria-selected", String(x === tab));
+      });
+      renderActive();
+    });
+  });
+
+  // --- copy / download / list actions ---
+  els.copyBtn.addEventListener("click", function () {
+    if (!active) return;
+    copyText(currentText(), mode === "uri" ? t("labelUri") : t("labelRaw"));
+  });
+
+  els.downloadBtn.addEventListener("click", function () {
+    if (!active) return;
+    downloadText(currentText(), cleanFileName(active.name), mode === "uri" ? "datauri" : "base64");
+  });
+
+  els.resultList.addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest("button[data-act]") : null;
+    if (!btn) return;
+    var row = btn.closest(".item");
+    if (!row) return;
+    var id = row.getAttribute("data-id");
+    var idx = -1;
+    for (var i = 0; i < records.length; i++) { if (records[i].id === id) { idx = i; break; } }
+    if (idx === -1) return;
+    var rec = records[idx];
+    var act = btn.getAttribute("data-act");
+
+    if (act === "copy") {
+      copyText(mode === "uri" ? rec.dataUri : rec.rawBase64,
+        mode === "uri" ? t("labelUri") : t("labelRaw"));
+    } else if (act === "download") {
+      downloadText(mode === "uri" ? rec.dataUri : rec.rawBase64,
+        cleanFileName(rec.name), mode === "uri" ? "datauri" : "base64");
+    } else if (act === "remove") {
+      records.splice(idx, 1);
+      if (active && active.id === id) active = records.length ? records[0] : null;
+      if (active) {
+        els.resultBadge.className = "badge badge--ok";
+        els.resultBadge.innerHTML = "<span></span>";
+        els.resultBadge.firstChild.textContent = t("badgeDone");
+      } else {
+        els.resultBadge.className = "badge";
+        els.resultBadge.innerHTML = "<span></span>";
+        els.resultBadge.firstChild.textContent = t("badgeIdle");
+      }
+      renderActive();
+      renderList();
+      updateCount();
+      toast(t("okRemoved"), "info");
+    }
+  });
+
+  els.clearAllBtn.addEventListener("click", function () {
+    if (!records.length) {
+      toast(t("listEmpty"), "info");
+      return;
+    }
+    records = [];
+    active = null;
+    hideAlert();
+    els.resultBadge.className = "badge";
+    els.resultBadge.innerHTML = "<span></span>";
+    els.resultBadge.firstChild.textContent = t("badgeIdle");
+    renderActive();
+    renderList();
+    updateCount();
+    toast(t("okCleared"), "ok");
+  });
+
+  els.resultList.addEventListener("mouseover", function (e) {
+    var row = e.target.closest ? e.target.closest(".item") : null;
+    if (!row || row === els.resultList.dataset.hovered) return;
+  });
+
+  // --- footer links ---
+  // Footer links are genuine in-page anchors (#privacy / #formats) and need no
+  // JS handler. Keeping them as real anchors means crawlers follow them instead
+  // of landing on dead "#" targets.
+
+  /* ============================================================
+     15. Boot
+     ============================================================ */
+  // Render the language declared by this page's own html[data-lang].
+  // Deliberately does NOT sniff navigator.language or read localStorage: that
+  // older behaviour could render English content at the "/" URL, contradicting
+  // the hreflang/canonical mapping that search engines rely on.
+  applyLanguage(currentLang);
+
+})();
+</script>
+</body>
+</html>
