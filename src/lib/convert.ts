@@ -78,6 +78,10 @@ export const MIME_EXT: Record<string, string> = {
   "image/svg+xml": "svg",
   "image/x-icon": "ico",
   "image/vnd.microsoft.icon": "ico",
+  /* Recognised when decoding only. AVIF is a decode-side addition — the
+     reverse tool accepts any base64 string it can identify, so it can
+     meet formats the upload path does not offer. */
+  "image/avif": "avif",
 };
 
 /* ------------------------------------------------------------------ *

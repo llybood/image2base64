@@ -17,18 +17,15 @@ import {
 } from "@/lib/convert";
 import { dict, t as tr, unitsOf } from "@/lib/dict";
 import type { Lang } from "@/lib/site";
+import { useToasts, type Toast, type ToastKind } from "./useToasts";
+
+export type { Toast, ToastKind } from "./useToasts";
 
 export type AlertKind = "error" | "warn" | "info";
-export type ToastKind = "ok" | "err" | "info";
 export type Badge = "idle" | "busy" | "done" | "error";
 export type Mode = "uri" | "raw";
 
-type Toast = { id: number; text: string; kind: ToastKind; leaving?: boolean };
 type Alert = { title: string; desc: string; kind: AlertKind } | null;
-
-const TOAST_LIMIT = 4;
-const TOAST_TTL = 3200;
-const TOAST_OUT = 220;
 
 export function useConverter(lang: Lang) {
   const d = dict[lang];
@@ -43,35 +40,19 @@ export function useConverter(lang: Lang) {
   const [mode, setMode] = useState<Mode>("uri");
   const [badge, setBadge] = useState<Badge>("idle");
   const [alert, setAlert] = useState<Alert>(null);
-  const [toasts, setToasts] = useState<Toast[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [urlValue, setUrlValue] = useState("");
   const [urlInvalid, setUrlInvalid] = useState(false);
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const toastSeq = useRef(0);
+  const { toasts, toast } = useToasts();
   const copyTimer = useRef<number | undefined>(undefined);
 
   const active = useMemo(
     () => records.find((r) => r.id === activeId) ?? null,
     [records, activeId]
   );
-
-  /* ---------------- toasts ---------------- */
-
-  const toast = useCallback((text: string, kind: ToastKind = "info") => {
-    if (!text) return;
-    const id = ++toastSeq.current;
-    setToasts((prev) => [...prev, { id, text, kind }].slice(-TOAST_LIMIT));
-    // Two-phase removal so the exit animation actually plays before unmount.
-    window.setTimeout(() => {
-      setToasts((prev) => prev.map((x) => (x.id === id ? { ...x, leaving: true } : x)));
-    }, TOAST_TTL - TOAST_OUT);
-    window.setTimeout(() => {
-      setToasts((prev) => prev.filter((x) => x.id !== id));
-    }, TOAST_TTL);
-  }, []);
 
   /* ---------------- error text mapping ----------------
      convert.ts reports codes, never prose — the message is resolved here

@@ -1,5 +1,14 @@
 import type { MetadataRoute } from "next";
-import { DEFAULT_LANG, LANGS, PATHS, abs, hreflangMap, type Lang } from "@/lib/site";
+import {
+  DEFAULT_LANG,
+  LANGS,
+  PAGES,
+  absoluteHreflangMap,
+  abs,
+  pagePath,
+  type Lang,
+  type Page,
+} from "@/lib/site";
 
 export const dynamic = "force-static";
 
@@ -17,26 +26,44 @@ function buildDate(): string {
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = buildDate();
 
-  // hreflang annotations live in the sitemap as well as in the page head:
-  // they are the two independent places a crawler looks for the pairing.
-  // Built from the same LANGS-derived map the head uses, then made
-  // absolute — so the sitemap cannot advertise a language the site does
-  // not route, or omit one it does.
-  const languages = Object.fromEntries(
-    Object.entries(hreflangMap(true)).map(([code, path]) => [code, abs(path)])
-  );
+  // One entry per (page, language) pair — six as the site stands.
+  //
+  // The outer loop is over pages, so each page's languages are listed
+  // together and every entry carries that *page's* alternates block. The
+  // alternates are built from absoluteHreflangMap(page), i.e. from the
+  // same function that generates the page head: a decoder entry points at
+  // the decoders in the other two languages, never at the encoders. This
+  // is also the second of the two independent places a crawler looks for
+  // the pairing, so building both from one source is what keeps them from
+  // ever disagreeing.
+  const entries: MetadataRoute.Sitemap = [];
 
-  // One entry per shipped language. The default language is listed first
-  // and carries full priority; the ordering is a weak hint to crawlers,
-  // but it keeps the sitemap reading in the same order as the page head
-  // declares its alternates.
-  const entry = (lang: Lang): MetadataRoute.Sitemap[number] => ({
-    url: abs(PATHS[lang]),
+  for (const page of PAGES) {
+    const languages = absoluteHreflangMap(page);
+    for (const lang of LANGS) {
+      entries.push(entry(lang, page, languages, lastModified));
+    }
+  }
+
+  return entries;
+}
+
+function entry(
+  lang: Lang,
+  page: Page,
+  languages: Record<string, string>,
+  lastModified: string
+): MetadataRoute.Sitemap[number] {
+  // The default language's copy of each page leads its group and carries
+  // full priority; the others trail it. Ordering is a weak hint, but it
+  // keeps the sitemap reading the way the page head declares alternates.
+  const isPrimary = lang === DEFAULT_LANG;
+
+  return {
+    url: abs(pagePath(lang, page)),
     lastModified,
     changeFrequency: "monthly",
-    priority: lang === DEFAULT_LANG ? 1 : 0.9,
+    priority: isPrimary ? 1 : 0.9,
     alternates: { languages },
-  });
-
-  return LANGS.map(entry);
+  };
 }

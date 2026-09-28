@@ -1,8 +1,12 @@
-import type { Lang } from "./site";
+import type { Lang, Page } from "./site";
 
 /* ============================================================
    FAQ — the single source for both the rendered accordion and the
    FAQPage structured data, so the two can never disagree.
+
+   Keyed by page as well as language. The two tools answer different
+   questions, and emitting one FAQPage payload on two URLs would tell a
+   crawler they are duplicates.
 
    Answers are written as plain text. Backticked spans are rendered as
    inline code on the page and stripped for the JSON-LD payload.
@@ -10,7 +14,11 @@ import type { Lang } from "./site";
 
 export type Faq = { q: string; a: string };
 
-const en: Faq[] = [
+/* ------------------------------------------------------------------ *
+ * Forward tool — image → base64
+ * ------------------------------------------------------------------ */
+
+const enEncode: Faq[] = [
   {
     q: "How do I convert an image to base64?",
     a: "Drag an image onto the drop zone, click to browse for a file, or paste straight from the clipboard with Ctrl+V (Cmd+V on macOS). The converter reads the bytes locally and returns the base64 string immediately — there is no upload step and no queue, so the result appears as fast as the file can be read.",
@@ -41,7 +49,7 @@ const en: Faq[] = [
   },
 ];
 
-const zh: Faq[] = [
+const zhEncode: Faq[] = [
   {
     q: "怎样把图片转成 Base64？",
     a: "把图片拖入上传区、点击选择文件，或直接用 Ctrl+V（macOS 为 Cmd+V）粘贴剪贴板中的图片。工具在本地读取字节并立即返回 Base64 字符串，没有上传步骤也没有排队，文件读多快结果就出多快。",
@@ -72,7 +80,7 @@ const zh: Faq[] = [
   },
 ];
 
-const de: Faq[] = [
+const deEncode: Faq[] = [
   {
     q: "Wie wandle ich ein Bild in Base64 um?",
     a: "Zieh ein Bild auf die Ablagefläche, klicke zum Auswählen einer Datei oder füge es direkt mit Strg+V (Cmd+V unter macOS) aus der Zwischenablage ein. Der Konverter liest die Bytes lokal und gibt den Base64-String sofort zurück – es gibt keinen Upload-Schritt und keine Warteschlange, das Ergebnis erscheint also so schnell, wie die Datei gelesen werden kann.",
@@ -103,7 +111,99 @@ const de: Faq[] = [
   },
 ];
 
-export const FAQ: Record<Lang, Faq[]> = { zh, en, de };
+/* ------------------------------------------------------------------ *
+ * Reverse tool — base64 → image
+ *
+ * Written as the inverse of the set above, not as a translation of it:
+ * someone arriving here with a string that will not decode has different
+ * questions from someone trying to produce one.
+ * ------------------------------------------------------------------ */
+
+const enDecode: Faq[] = [
+  {
+    q: "How do I convert base64 to image?",
+    a: "Paste the base64 string into the field above, with or without a `data:` URI prefix. The converter validates it, reads the real format from the first bytes of the decoded data, and renders the image — then Download saves it as a file.",
+  },
+  {
+    q: "Can I decode base64 to image without a data URI prefix?",
+    a: "Yes. A raw base64 string carries no type information at all, so the format is detected from the decoded bytes themselves, using the same magic-byte check the encoder relies on. If a prefix is present it is treated as a hint only: when it disagrees with the bytes, the bytes win and the page tells you the prefix was wrong.",
+  },
+  {
+    q: "Why will my base64 string not decode?",
+    a: "Three causes account for nearly all of it: the string was truncated when it was copied, it contains characters outside the base64 alphabet (a stray quote or a line number that came along with it), or it is not base64 at all. The tool names which of the three it found rather than returning a generic error.",
+  },
+  {
+    q: "Does it handle line breaks and URL-safe base64?",
+    a: "Yes. Whitespace and line breaks are ignored, so a string wrapped by an email client or an editor still decodes. The URL-safe alphabet using `-` and `_` is accepted alongside the standard `+` and `/`, and missing `=` padding is restored before decoding.",
+  },
+  {
+    q: "Which formats can base64 be decoded to?",
+    a: "PNG, JPG, GIF, WebP, BMP, ICO, SVG and AVIF, up to 10 MB of decoded data. The format is identified from the bytes, so a string labelled PNG that actually contains a JPEG decodes as a JPEG. SVG is returned as its original markup and previewed as an image — never injected into the page as markup.",
+  },
+  {
+    q: "Is my base64 string uploaded anywhere?",
+    a: "No. Decoding happens in browser memory and the string is never transmitted. You can confirm it in your browser's network panel — the only request is for the page itself.",
+  },
+];
+
+const zhDecode: Faq[] = [
+  {
+    q: "怎样把 Base64 转成图片？",
+    a: "把 Base64 字符串粘贴到上方输入框即可，带不带 `data:` 前缀都行。工具会先校验字符串，再从解码后数据的最前面几个字节识别真实格式并渲染出图片，点击下载即可保存为文件。",
+  },
+  {
+    q: "没有 Data URI 前缀也能解码吗？",
+    a: "可以。纯 Base64 字符串本身不含任何类型信息，因此格式由解码后的字节实测得出，用的是与编码方向相同的字节头识别。若字符串带有前缀，前缀只当作提示：一旦它与字节矛盾，以字节为准，并在页面上告知你前缀有误。",
+  },
+  {
+    q: "为什么我的 Base64 字符串解不出来？",
+    a: "几乎全部情况都落在三种原因上：复制时字符串被截断、混入了 base64 字符集之外的字符（比如一起复制进来的引号或行号）、或者它根本不是 base64。工具会指出命中的是哪一种，而不是笼统报错。",
+  },
+  {
+    q: "带换行或 URL-safe 字符的字符串能处理吗？",
+    a: "能。空格与换行会被忽略，被邮件客户端或编辑器折行过的字符串照样可解；URL-safe 变体（`-` 与 `_`）与标准的 `+`、`/` 一并接受，缺失的 `=` 补位会在解码前自动补回。",
+  },
+  {
+    q: "可以解码成哪些图片格式？",
+    a: "PNG、JPG、GIF、WebP、BMP、ICO、SVG 与 AVIF，解码后数据上限 10 MB。格式完全由字节判定，所以一个标着 PNG 实则内容是 JPEG 的字符串，会按 JPEG 解码。SVG 会还原为原始代码并按图片预览，绝不会作为标记注入页面。",
+  },
+  {
+    q: "Base64 字符串会被上传吗？",
+    a: "不会。解码全程在浏览器内存中完成，字符串不会被发送出去。你可以打开浏览器的网络面板确认：除了页面本身，没有任何额外请求。",
+  },
+];
+
+const deDecode: Faq[] = [
+  {
+    q: "Wie wandle ich Base64 in ein Bild um?",
+    a: "Füge den Base64-String oben in das Feld ein – mit oder ohne `data:`-URI-Präfix. Der Konverter prüft ihn, liest das echte Format aus den ersten Bytes der dekodierten Daten und zeigt das Bild an; mit Download speicherst du es als Datei.",
+  },
+  {
+    q: "Kann ich Base64 auch ohne Data-URI-Präfix dekodieren?",
+    a: "Ja. Ein reiner Base64-String enthält überhaupt keine Typinformation, deshalb wird das Format aus den dekodierten Bytes selbst erkannt – mit derselben Magic-Byte-Prüfung, auf die sich die umgekehrte Richtung stützt. Ein vorhandenes Präfix gilt nur als Hinweis: widerspricht es den Bytes, gewinnen die Bytes, und die Seite sagt dir, dass das Präfix falsch war.",
+  },
+  {
+    q: "Warum lässt sich mein Base64-String nicht dekodieren?",
+    a: "Drei Ursachen erklären fast alle Fälle: der String wurde beim Kopieren abgeschnitten, er enthält Zeichen außerhalb des Base64-Alphabets (etwa ein mitkopiertes Anführungszeichen oder eine Zeilennummer), oder er ist gar kein Base64. Das Werkzeug benennt den konkreten Fall, statt eine allgemeine Fehlermeldung auszugeben.",
+  },
+  {
+    q: "Funktionieren Zeilenumbrüche und URL-sichere Zeichen?",
+    a: "Ja. Leerzeichen und Zeilenumbrüche werden ignoriert, ein von E-Mail-Programmen oder Editoren umbrochener String lässt sich also weiterhin dekodieren. URL-sichere Varianten mit `-` und `_` werden ebenso akzeptiert wie `+` und `/`, fehlendes `=`-Padding wird vor dem Dekodieren ergänzt.",
+  },
+  {
+    q: "In welche Formate kann Base64 dekodiert werden?",
+    a: "PNG, JPG, GIF, WebP, BMP, ICO, SVG und AVIF, bis zu 10 MB dekodierte Daten. Das Format wird aus den Bytes bestimmt: ein als PNG bezeichneter String, der tatsächlich ein JPEG enthält, wird als JPEG dekodiert. SVG wird als Original-Markup zurückgegeben und als Bild angezeigt – nie als Markup in die Seite eingefügt.",
+  },
+  {
+    q: "Wird mein Base64-String irgendwohin hochgeladen?",
+    a: "Nein. Das Dekodieren läuft im Browserspeicher und der String wird nie übertragen. Du kannst das im Netzwerk-Panel deines Browsers überprüfen – die einzige Anfrage betrifft die Seite selbst.",
+  },
+];
+
+export const FAQ: Record<Page, Record<Lang, Faq[]>> = {
+  encode: { zh: zhEncode, en: enEncode, de: deEncode },
+  decode: { zh: zhDecode, en: enDecode, de: deDecode },
+};
 
 /** Plain-text answer for structured data. */
 export const plain = (s: string) => s.replace(/`/g, "");

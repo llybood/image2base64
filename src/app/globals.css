@@ -67,34 +67,101 @@ button,input,textarea{ font:inherit; color:inherit; }
 .container{ width:100%; max-width:1440px; margin:0 auto; padding:0 32px; }
 
 /* ============================================================
-   Global nav (44px, pure black)
+   Global nav (pure black)
+
+   One row, 64px: the wordmark on the left, then the tool tabs and the
+   language menu as a single cluster on the right. The name is set at
+   20px so it reads as a title rather than as a small label, and the
+   header is sized to hold it rather than the other way round.
    ============================================================ */
 .nav{
   position:sticky; top:0; z-index:40;
-  height:44px; background:#000; color:#fff;
+  background:#000; color:#fff;
 }
 .nav__inner{
-  height:100%; display:flex; align-items:center; gap:20px;
+  min-height:64px;
+  display:flex; align-items:center; flex-wrap:wrap; gap:12px 24px;
 }
 .nav__brand{
-  font-size:12px; font-weight:600; letter-spacing:0;
-  display:flex; align-items:center; gap:8px; white-space:nowrap;
+  display:flex; align-items:center; gap:9px; white-space:nowrap;
+  font-size:20px; font-weight:600; letter-spacing:-0.028em;
+  color:#fff; text-decoration:none;
 }
-.nav__brand svg{ display:block; }
-.nav__spacer{ flex:1; }
+.nav__brand svg{ display:block; flex:none; }
+.nav__right{
+  margin-left:auto;
+  display:flex; align-items:center; gap:14px;
+}
 
-.lang{
-  display:inline-flex; align-items:center;
-  background:var(--tile); border-radius:var(--r-sm); padding:2px;
+/* ---- header: tool tabs ----------------------------------------
+   A segmented control rather than two loose links: they are two halves
+   of one choice, and the shared track says so without needing a label
+   above them. */
+.tools{
+  display:inline-flex; align-items:center; gap:2px;
+  padding:3px; background:var(--tile); border-radius:var(--r-sm);
 }
-.lang__btn{
-  appearance:none; border:0; background:transparent; color:#cccccc;
-  font-size:12px; line-height:1; padding:6px 12px; border-radius:6px;
-  text-decoration:none; display:inline-block; white-space:nowrap;
-  cursor:pointer; transition:background .18s ease, color .18s ease;
+.tools__btn{
+  display:inline-block; white-space:nowrap;
+  font-size:13px; line-height:1; padding:8px 14px;
+  color:#c7c7cc; text-decoration:none; border-radius:6px;
+  transition:background .18s ease, color .18s ease;
 }
-.lang__btn:hover{ color:#fff; }
-.lang__btn[aria-current="true"]{ background:var(--primary); color:#fff; font-weight:600; }
+.tools__btn:hover{ color:#fff; background:rgba(255,255,255,.1); }
+.tools__btn[aria-current="true"]{ color:#fff; background:var(--primary); font-weight:600; }
+
+/* ---- header: language menu ------------------------------------
+   Collapsed until asked. The trigger states what the control is, not
+   where you currently are — the current language is marked inside the
+   menu — so its width never changes as languages are added. */
+.langmenu{ position:relative; }
+.langmenu__btn{
+  display:inline-flex; align-items:center; gap:7px;
+  list-style:none; cursor:pointer; white-space:nowrap;
+  font-size:13px; line-height:1; padding:8px 12px;
+  color:#e8e8ed; background:transparent;
+  border:1px solid rgba(255,255,255,.24); border-radius:var(--r-sm);
+  transition:background .18s ease, border-color .18s ease;
+}
+/* The caret is supplied by the markup; the UA marker would sit beside
+   it and read as a second, unrelated affordance. */
+.langmenu__btn::-webkit-details-marker{ display:none; }
+.langmenu__btn::marker{ content:""; }
+.langmenu__btn svg{ flex:none; }
+.langmenu__btn:hover{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.4); }
+.langmenu[open] .langmenu__btn{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.44); }
+.langmenu__chev{ transition:transform .18s ease; }
+.langmenu[open] .langmenu__chev{ transform:rotate(180deg); }
+.langmenu__panel{
+  position:absolute; right:0; top:calc(100% + 8px); min-width:176px;
+  padding:6px; z-index:50;
+  background:#1c1c1e; border:1px solid rgba(255,255,255,.16);
+  border-radius:var(--r-md); box-shadow:0 14px 36px rgba(0,0,0,.5);
+}
+.langmenu__item{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:9px 12px; border-radius:6px;
+  font-size:14px; color:#d2d2d7; text-decoration:none;
+}
+.langmenu__item:hover{ background:rgba(255,255,255,.09); color:#fff; }
+.langmenu__item[aria-current="true"]{ color:#fff; font-weight:600; }
+.langmenu__check{ opacity:0; color:var(--primary-on-dark); }
+.langmenu__item[aria-current="true"] .langmenu__check{ opacity:1; }
+
+/* Phones. The wordmark plus two spelled-out tool labels plus the menu
+   need about 600px, so below that the cluster takes the second line
+   rather than the labels shrinking to initials. The word "Language" is
+   dropped once the row is tight — the globe and the menu's own contents
+   carry the meaning, and `aria-label` keeps the trigger named for screen
+   readers when only the icon is left. */
+@media (max-width:640px){
+  .nav__inner{ padding-top:12px; padding-bottom:12px; gap:10px 12px; }
+  .nav__brand{ font-size:18px; }
+  .tools__btn{ font-size:12px; padding:8px 11px; }
+  .langmenu__btn{ padding:8px 10px; }
+  .langmenu__word{ display:none; }
+  .langmenu__panel{ min-width:158px; }
+}
 
 /* ============================================================
    Hero
@@ -607,12 +674,19 @@ button,input,textarea{ font:inherit; color:inherit; }
 
 /* Hero CTAs and the brand are anchors now, not buttons. */
 .btn{ text-decoration:none; }
-.nav__brand{ color:#fff; text-decoration:none; }
 
-/* The sticky 44px nav would otherwise cover the target of #tool / #formats. */
+/* The offset that keeps #tool / #formats / #privacy out from under the
+   sticky header. Two values, because the header has two heights: one
+   64px row on desktop, a wrapped pair of rows on a phone. See the nav
+   block at the top of this file. */
 .workspace,
 .card[id],
-.section[id]{ scroll-margin-top:64px; }
+.section[id]{ scroll-margin-top:80px; }
+@media (max-width:640px){
+  .workspace,
+  .card[id],
+  .section[id]{ scroll-margin-top:104px; }
+}
 
 /* Visible field label above the image-URL row — it carries the
    "convert image URL to base64" phrasing and gives the input an
@@ -632,4 +706,101 @@ button,input,textarea{ font:inherit; color:inherit; }
 @media (max-width:640px){
   .spec{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
   .spec th, .spec td{ padding:10px 12px; }
+}
+
+/* ============================================================
+   REVERSE TOOL  (base64 → image)
+
+   Additions only. Everything the two tools share — cards, buttons,
+   badges, alerts, toasts, chips, bullets, the spec tables — is defined
+   above and used unchanged. This block covers what is genuinely new:
+   the tool switcher row, the textarea, the preview frame and the
+   "detected" status line.
+   ============================================================ */
+
+/* ---- header: tool tabs ----------------------------------------
+   The tabs and the language menu are styled in the nav block at the top
+   of this file, together with the rest of the header. What is worth
+   repeating here is the wording: the two labels spell out "to" instead
+   of using an arrow, because they are two tools rather than the two
+   steps of one flow — a bare arrow reads as a direction the visitor has
+   to interpret. */
+
+/* ---- input: textarea -----------------------------------------
+   Monospace, because the field holds base64 and a proportional face
+   makes it much harder to eyeball whether a paste is complete. */
+.textarea{
+  display:block; width:100%; margin-top:8px;
+  min-height:168px; resize:vertical;
+  padding:14px 16px;
+  background:var(--canvas); color:var(--ink);
+  border:1px solid var(--hairline); border-radius:var(--r-md);
+  font-family:var(--font-mono); font-size:13px; line-height:1.6; letter-spacing:0;
+  word-break:break-all;
+}
+.textarea::placeholder{
+  color:#9a9aa0; font-family:var(--font); font-size:14px; letter-spacing:-0.022em;
+}
+.textarea:focus{
+  outline:none; border-color:var(--primary-focus);
+  box-shadow:0 0 0 3px rgba(0,113,227,.16);
+}
+
+.pasterow{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+/* The icon sits inside the pill, so the gap .btn already declares is
+   what separates it from the label; nothing extra is needed. */
+.pasterow .btn svg{ flex:none; }
+
+/* ---- detected status line ------------------------------------ */
+.detected{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  margin-top:16px; padding:11px 14px;
+  background:var(--parchment); border-radius:var(--r-md);
+  font-size:13px; line-height:1.5;
+}
+.detected__k{ flex:none; color:var(--ink-48); font-weight:600; }
+.detected__v{ color:var(--ink); }
+.detected__v--idle{ color:var(--ink-48); }
+/* Amber, not red: the string decoded fine, only the label was wrong. */
+.detected__v--warn{ color:#7a5600; }
+
+/* ---- resting state ------------------------------------------- */
+.blankstate{ display:flex; justify-content:center; padding:4px 0 18px; color:#c7c7cc; }
+
+/* ---- preview frame -------------------------------------------
+   Checkerboard behind the image, so a transparent PNG reads as
+   transparent instead of as a white image on a white card. */
+.preview{
+  display:flex; align-items:center; justify-content:center;
+  min-height:260px; max-height:460px; padding:16px; margin-bottom:18px;
+  background-color:#fff;
+  background-image:
+    linear-gradient(45deg, var(--divider-soft) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--divider-soft) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--divider-soft) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--divider-soft) 75%);
+  background-size:16px 16px;
+  background-position:0 0, 0 8px, 8px -8px, -8px 0;
+  border:1px solid var(--hairline); border-radius:var(--r-md);
+  overflow:hidden;
+}
+.preview img{ display:block; max-width:100%; max-height:428px; object-fit:contain; }
+.preview--empty{ min-height:150px; }
+.preview__unavailable{
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  max-width:340px; text-align:center;
+  font-size:13px; line-height:1.6; color:var(--ink-48);
+}
+.preview__unavailable svg{ color:#c7c7cc; }
+
+/* ---- result actions ------------------------------------------ */
+.result__actions--end{ justify-content:flex-end; }
+.result__note--block{ margin:10px 0 0; text-align:right; }
+
+@media (max-width:640px){
+  .textarea{ min-height:140px; }
+  .pasterow .btn{ flex:1 1 auto; }
+  .preview{ min-height:180px; max-height:320px; }
+  .preview img{ max-height:288px; }
+  .result__note--block{ text-align:left; }
 }

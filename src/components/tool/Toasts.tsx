@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ToastErrIcon, ToastInfoIcon, ToastOkIcon } from "./Icons";
-import type { ToastKind } from "./useConverter";
+import type { Toast, ToastKind } from "./useToasts";
 
 const ICON: Record<ToastKind, ReactNode> = {
   ok: <ToastOkIcon />,
@@ -8,11 +8,7 @@ const ICON: Record<ToastKind, ReactNode> = {
   info: <ToastInfoIcon />,
 };
 
-export function Toasts({
-  items,
-}: {
-  items: { id: number; text: string; kind: ToastKind; leaving?: boolean }[];
-}) {
+export function Toasts({ items }: { items: Toast[] }) {
   return (
     <div className="toasts" aria-live="polite" aria-atomic="false">
       {items.map((t) => (

@@ -31,32 +31,66 @@ function ok(cond, label, detail) {
   }
 }
 
-/* ---------- target queries, mirrored from src/lib/site.ts ---------- */
+/* ---------- target queries, mirrored from src/lib/site.ts ----------
+ *
+ * Keyed by (page, language), because the two tools target two different
+ * query clusters. Sharing one list between them is precisely the mistake
+ * the separate pages exist to avoid: the encoder's terms would then
+ * certify the decoder without ever appearing on it.
+ */
 
 const TARGETS = {
-  zh: [
-    { query: "图片转 base64", probe: "图片转 base64" },
-    { query: "图片转 base64 在线", probe: "图片转 base64 在线" },
-    { query: "图片 url 转 base64", probe: "图片 url 转 base64" },
-    { query: "base64 编码", probe: "base64 编码" },
-    { query: "图片 base64 转换", probe: "图片 base64 转换" },
-  ],
-  en: [
-    { query: "convert image url to base64", probe: "convert image url to base64" },
-    { query: "convert image to base64", probe: "convert image to base64" },
-    { query: "image to base64 online", probe: "image to base64 online" },
-    { query: "base64 encode", probe: "base64 encode" },
-    { query: "image to base64 converter", probe: "image to base64 converter" },
-  ],
-  de: [
-    { query: "bild zu base64", probe: "bild zu base64" },
-    { query: "bild in base64 umwandeln", probe: "bild in base64 umwandeln" },
-    // German compounds the noun, so the page writes "Bild-URL" while the
-    // query is typed with a space. The probe is the literal on the page.
-    { query: "bild url zu base64", probe: "bild-url zu base64" },
-    { query: "base64 kodieren", probe: "base64 kodieren" },
-    { query: "base64 konverter", probe: "base64 konverter" },
-  ],
+  encode: {
+    zh: [
+      { query: "图片转 base64", probe: "图片转 base64" },
+      { query: "图片转 base64 在线", probe: "图片转 base64 在线" },
+      { query: "图片 url 转 base64", probe: "图片 url 转 base64" },
+      { query: "base64 编码", probe: "base64 编码" },
+      { query: "图片 base64 转换", probe: "图片 base64 转换" },
+    ],
+    en: [
+      { query: "convert image url to base64", probe: "convert image url to base64" },
+      { query: "convert image to base64", probe: "convert image to base64" },
+      { query: "image to base64 online", probe: "image to base64 online" },
+      { query: "base64 encode", probe: "base64 encode" },
+      { query: "image to base64 converter", probe: "image to base64 converter" },
+    ],
+    de: [
+      { query: "bild zu base64", probe: "bild zu base64" },
+      { query: "bild in base64 umwandeln", probe: "bild in base64 umwandeln" },
+      // German compounds the noun, so the page writes "Bild-URL" while the
+      // query is typed with a space. The probe is the literal on the page.
+      { query: "bild url zu base64", probe: "bild-url zu base64" },
+      { query: "base64 kodieren", probe: "base64 kodieren" },
+      { query: "base64 konverter", probe: "base64 konverter" },
+    ],
+  },
+  decode: {
+    zh: [
+      { query: "base64 转图片", probe: "base64 转图片" },
+      { query: "base64 转图片 在线", probe: "base64 转图片 在线" },
+      { query: "base64 解码", probe: "base64 解码" },
+      { query: "base64 转 png", probe: "base64 转 png" },
+      { query: "base64 转图片 工具", probe: "base64 转图片 工具" },
+    ],
+    en: [
+      { query: "convert base64 to image", probe: "convert base64 to image" },
+      { query: "base64 to image converter", probe: "base64 to image converter" },
+      { query: "base64 to image online", probe: "base64 to image online" },
+      { query: "decode base64 to image", probe: "decode base64 to image" },
+      { query: "base64 to png", probe: "base64 to png" },
+    ],
+    de: [
+      { query: "base64 zu bild", probe: "base64 zu bild" },
+      { query: "base64 in bild umwandeln", probe: "base64 in bild umwandeln" },
+      // Same compound problem as the forward page: German writes
+      // "Base64-Bild-Konverter" as one hyphenated word while the query is
+      // typed with spaces. `probe` is the literal on the page.
+      { query: "base64 bild konverter", probe: "base64-bild-konverter" },
+      { query: "base64 dekodieren", probe: "base64 dekodieren" },
+      { query: "base64 zu png", probe: "base64 zu png" },
+    ],
+  },
 };
 
 /*
@@ -67,27 +101,47 @@ const TARGETS = {
  */
 const LIMITS = { title: 66, description: 200 };
 
-/* ---------- language routing, mirrored from src/lib/site.ts ----------
+/* ---------- routing, mirrored from src/lib/site.ts ----------
  *
  * Deliberately duplicated rather than imported: the verifier must not be
  * able to drift along with the code it is checking. English is the default
  * language, so it owns the site root and is what x-default must advertise.
  *
- * If a language is ever added or the default swapped, this block is the
- * whole contract — the page checks at the bottom iterate LANGS, so a
- * language cannot end up routed but unchecked.
+ * A URL is a (language, page) pair, not a language. The site ships two
+ * tools, so "the German version" is ambiguous on its own — and a
+ * language-only table cannot express it, which is exactly why the
+ * assertions below are written per page rather than per language.
+ *
+ * If a language or a page is ever added, this block is the whole
+ * contract: the checks at the bottom iterate PAGES × LANGS, so nothing
+ * can end up routed but unchecked.
  *
  * The set must match src/lib/site.ts; the order need not, because every
  * assertion below is membership- or look-up based. It is kept in the same
  * order anyway so the two lists can be diffed at a glance.
  */
 const LANGS = ["en", "de", "zh"];
-const PATHS = { en: "/", zh: "/zh/", de: "/de/" };
+const PAGES = ["encode", "decode"];
 const HTML_LANG = { en: "en", zh: "zh-CN", de: "de" };
 const DEFAULT_LANG = "en";
-const DEFAULT_PATH = PATHS[DEFAULT_LANG];
-/** Every language except the default, for the cross-link assertions. */
-const OTHER_LANGS = LANGS.filter((l) => l !== DEFAULT_LANG);
+
+/** The page's path under each language's root. `encode` owns the root
+    itself; `decode` sits one segment below it. */
+const LANG_ROOT = { en: "/", zh: "/zh/", de: "/de/" };
+const DECODE_SLUG = "base64-to-image/";
+
+/**
+ * The one place a URL is composed here, mirroring `pagePath` in
+ * src/lib/site.ts. Every assertion below compares against this rather
+ * than against a hard-coded string, so a page cannot be routed at one
+ * path and checked at another.
+ */
+function pagePath(lang, page) {
+  return page === "encode" ? LANG_ROOT[lang] : LANG_ROOT[lang] + DECODE_SLUG;
+}
+
+/** Every (page, language) URL the site ships, in a stable order. */
+const ALL_PATHS = PAGES.flatMap((page) => LANGS.map((lang) => pagePath(lang, page)));
 
 const CJK = /[\u2E80-\u9FFF\uFF00-\uFF60\u3000-\u303F]/;
 const width = (s) => [...s].reduce((n, c) => n + (CJK.test(c) ? 2 : 1), 0);
@@ -166,6 +220,21 @@ function pathOf(url) {
 }
 
 /**
+ * Order-insensitive comparison of two {code: value} maps.
+ *
+ * Used for alternates blocks, where the keys are a set and the insertion
+ * order is an implementation detail. Comparing serialised objects would
+ * make a harmless reordering look like a failure.
+ */
+function sameMap(a, b) {
+  const ka = Object.keys(a).sort();
+  const kb = Object.keys(b).sort();
+  if (ka.length !== kb.length) return false;
+  if (!ka.every((k, i) => k === kb[i])) return false;
+  return ka.every((k) => a[k] === b[k]);
+}
+
+/**
  * Absolute URLs the page advertises in machine-readable metadata.
  *
  * Deliberately excludes body prose. The guide legitimately shows
@@ -189,8 +258,8 @@ function metadataUrls(html) {
 
 /* ---------- per-page checks ---------- */
 
-function checkPage(lang, file) {
-  console.log(`\n=== ${lang.toUpperCase()}  ${file} ===`);
+function checkPage(lang, page, file) {
+  console.log(`\n=== ${lang.toUpperCase()} / ${page}  ${file} ===`);
 
   if (!existsSync(file)) {
     ok(false, `${file} exists`);
@@ -203,7 +272,7 @@ function checkPage(lang, file) {
   const headingText = [...h1s, ...h2s].join(" \u0000 ").toLowerCase();
 
   /* --- target query coverage --- */
-  for (const t of TARGETS[lang]) {
+  for (const t of TARGETS[page][lang]) {
     const inBody = text.includes(t.probe);
     const inHeading = headingText.includes(t.probe);
     ok(inBody, `query in body text: "${t.query}"`);
@@ -231,13 +300,13 @@ function checkPage(lang, file) {
   }
 
   /* --- canonical + hreflang --- */
+  const expectedPath = pagePath(lang, page);
   const canonical = attr(html, /<link rel="canonical" href="([^"]*)"/i);
-  const expectedPath = PATHS[lang];
   ok(!!canonical, "has canonical");
   if (canonical) {
     ok(
-      canonical.endsWith(expectedPath),
-      `canonical ends with ${expectedPath}`,
+      pathOf(canonical) === expectedPath,
+      `canonical is this page's own path (${expectedPath})`,
       `got ${canonical}`
     );
   }
@@ -248,27 +317,46 @@ function checkPage(lang, file) {
   for (const want of [...LANGS.map((l) => HTML_LANG[l]), "x-default"]) {
     ok(want in alt, `hreflang="${want}" present`);
   }
-  // Each annotation must point where its code claims, not merely exist:
-  // a set that is present but mislabelled is worse than a missing one.
+  // Each annotation must point at *this page* in its language, not at the
+  // language root and not at the sibling tool. This is the assertion the
+  // second page was added to break, so it is spelled out per language
+  // rather than only checked as a set.
   for (const l of LANGS) {
     const code = HTML_LANG[l];
     if (code in alt) {
       ok(
-        pathOf(alt[code]) === PATHS[l],
-        `hreflang="${code}" points at ${PATHS[l]}`,
+        pathOf(alt[code]) === pagePath(l, page),
+        `hreflang="${code}" points at this page's ${l} counterpart (${pagePath(l, page)})`,
         `got ${alt[code]}`
       );
     }
   }
-  // The point of the x-default annotation is to name the default language,
-  // so this asserts where it points, not merely that it exists. All
-  // language pages must agree on it.
+  // The point of the x-default annotation is to name the default
+  // language's copy of *this* page, so this asserts where it points, not
+  // merely that it exists. All three languages must agree on it.
   if ("x-default" in alt) {
     ok(
-      pathOf(alt["x-default"]) === DEFAULT_PATH,
-      `x-default points at the default language (${DEFAULT_PATH})`,
+      pathOf(alt["x-default"]) === pagePath(DEFAULT_LANG, page),
+      `x-default points at this page in the default language (${pagePath(DEFAULT_LANG, page)})`,
       `got ${alt["x-default"]}`
     );
+  }
+  // The reverse page's annotations must never resolve to a language root:
+  // that would tell a crawler the German decoder is the English encoder.
+  // The check above already rules it out, but it would keep passing if the
+  // two pages ever collapsed onto one path — and this is the specific
+  // regression worth naming.
+  if (page === "decode") {
+    for (const l of LANGS) {
+      const code = HTML_LANG[l];
+      if (code in alt) {
+        ok(
+          pathOf(alt[code]) !== LANG_ROOT[l],
+          `hreflang="${code}" on the reverse page does not point at the encoder (${LANG_ROOT[l]})`,
+          `got ${alt[code]}`
+        );
+      }
+    }
   }
 
   /* --- html lang --- */
@@ -329,15 +417,45 @@ function checkPage(lang, file) {
       !JSON.stringify(graph).includes("aggregateRating"),
       "no fabricated aggregateRating"
     );
+    // Every structured-data URL on this site's own origin must describe
+    // this page, not its sibling. External references — @context and
+    // anything else on another host — are out of scope by construction,
+    // which is why the comparison is origin-scoped rather than a plain
+    // scan for site-shaped paths: "https://schema.org" resolves to "/".
+    const ownOrigin = canonical ? new URL(canonical).origin : null;
+    const wanted = new Set([
+      ...LANGS.map((l) => pagePath(l, page)),
+      pagePath(DEFAULT_LANG, page),
+    ]);
+    const offending = [];
+    if (ownOrigin) {
+      for (const m of JSON.stringify(graph).matchAll(/https?:\/\/[^"\s,)\\]+/g)) {
+        let u;
+        try {
+          u = new URL(m[0]);
+        } catch {
+          continue;
+        }
+        if (u.origin !== ownOrigin) continue;
+        const p = pathOf(m[0]);
+        if (p && ALL_PATHS.includes(p) && !wanted.has(p)) offending.push(p);
+      }
+    }
+    ok(
+      offending.length === 0,
+      "JSON-LD names no other page of this site",
+      offending.length ? `found: ${[...new Set(offending)].join(", ")}` : undefined
+    );
   }
 
   /* --- cross-language links, reachable without JS --- */
-  // Every other language, not just one. With three languages a page that
-  // links to only one of its siblings still looks fine to a naive check
-  // while leaving the third unreachable by following links alone.
+  // Every other language *of this page* — not just one, and not the
+  // language root. With three languages a page that links to only its
+  // siblings' roots still looks fine to a naive check while sending the
+  // visitor into the other tool.
   for (const l of LANGS.filter((x) => x !== lang)) {
-    const href = `href="${PATHS[l]}"`;
-    ok(html.includes(href), `links to the ${l} version (${href})`);
+    const href = `href="${pagePath(l, page)}"`;
+    ok(html.includes(href), `links to the ${l} copy of this page (${href})`);
   }
   ok(/aria-current="true"/.test(html), "current language marked with aria-current");
 
@@ -381,27 +499,70 @@ function checkSiteFiles() {
     }
 
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => pathOf(m[1]));
+    // One URL per (page, language) pair — six while the site ships two
+    // tools in three languages. Asserting the count against the routing
+    // table rather than a literal means adding a page cannot leave the
+    // sitemap silently short.
     ok(
-      locs.length === LANGS.length,
-      `sitemap lists exactly ${LANGS.length} URLs (found ${locs.length})`
+      locs.length === ALL_PATHS.length,
+      `sitemap lists exactly ${ALL_PATHS.length} URLs, one per page × language (found ${locs.length})`
     );
-    ok(
-      locs.includes(DEFAULT_PATH),
-      `sitemap lists the default language as a page (${DEFAULT_PATH})`
-    );
-    for (const l of OTHER_LANGS) {
-      ok(locs.includes(PATHS[l]), `sitemap lists the ${l} page (${PATHS[l]})`);
+    for (const p of ALL_PATHS) {
+      ok(locs.includes(p), `sitemap lists ${p}`);
     }
     // No duplicate <loc>: two entries for one URL is a sitemap error, and
     // an easy one to introduce when the list is generated.
     ok(new Set(locs).size === locs.length, "sitemap lists no URL twice");
 
+    /*
+     * Per-entry alternates.
+     *
+     * This is the assertion the second page exists to make meaningful. A
+     * sitemap that lists six URLs but gives every one of them the same
+     * alternates block is worse than one that omits alternates entirely:
+     * it actively tells a crawler that the decoder and the encoder are
+     * translations of each other. So each block is checked against its own
+     * page, read back out of its own <loc> rather than assumed.
+     */
+    const blocks = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => m[1]);
+    ok(
+      blocks.length === ALL_PATHS.length,
+      `sitemap has one <url> block per page × language (found ${blocks.length})`
+    );
+
+    let decodeBlocks = 0;
+    for (const b of blocks) {
+      const loc = pathOf(/<loc>([^<]+)<\/loc>/.exec(b)?.[1] ?? "");
+      const page = loc && loc.includes(DECODE_SLUG) ? "decode" : "encode";
+      const lang = LANGS.find((l) => pagePath(l, page) === loc);
+      if (lang) {
+        if (page === "decode") decodeBlocks++;
+        const want = {};
+        for (const l of LANGS) want[HTML_LANG[l]] = pagePath(l, page);
+        want["x-default"] = pagePath(DEFAULT_LANG, page);
+
+        const got = {};
+        for (const m of b.matchAll(/hreflang="([^"]+)"\s+href="([^"]+)"/g)) {
+          got[m[1]] = pathOf(m[2]);
+        }
+        ok(
+          sameMap(got, want),
+          `sitemap block ${loc} pairs with its own page in every language`,
+          `got ${JSON.stringify(got)} want ${JSON.stringify(want)}`
+        );
+      }
+    }
+    ok(
+      decodeBlocks === LANGS.length,
+      `every reverse page has its own sitemap block (found ${decodeBlocks})`
+    );
+
     const xd = /hreflang="x-default"\s+href="([^"]+)"/i.exec(xml);
     ok(!!xd, "sitemap carries an x-default annotation");
     if (xd) {
       ok(
-        pathOf(xd[1]) === DEFAULT_PATH,
-        `sitemap x-default points at the default language (${DEFAULT_PATH})`,
+        pathOf(xd[1]) === pagePath(DEFAULT_LANG, "encode"),
+        `sitemap x-default points at the default language (${pagePath(DEFAULT_LANG, "encode")})`,
         `got ${xd[1]}`
       );
     }
@@ -418,12 +579,24 @@ console.log("Base64 Studio — SEO verification");
 if (realDomain) console.log(`domain under test: ${realDomain}`);
 else console.log("(pass a domain as argv[2] to also assert the placeholder is gone)");
 
-/** out/index.html for "/", out/zh/index.html for "/zh/", and so on. */
-const pageFile = (lang) =>
-  join(OUT, ...PATHS[lang].split("/").filter(Boolean), "index.html");
+/** out/index.html for "/", out/zh/base64-to-image/index.html, and so on. */
+const pageFile = (lang, page) =>
+  join(OUT, ...pagePath(lang, page).split("/").filter(Boolean), "index.html");
 
-// Driven by LANGS, so a language cannot end up routed but unchecked.
-for (const lang of LANGS) checkPage(lang, pageFile(lang));
+// Driven by PAGES × LANGS, so nothing can end up routed but unchecked.
+// The outer loop is over pages so that one page's languages are reported
+// together — easier to diff against the source when something breaks.
+let checked = 0;
+for (const page of PAGES) {
+  for (const lang of LANGS) {
+    checkPage(lang, page, pageFile(lang, page));
+    checked++;
+  }
+}
+ok(
+  checked === PAGES.length * LANGS.length,
+  `every page × language combination was checked (${checked})`
+);
 checkSiteFiles();
 
 console.log(`\n${"-".repeat(52)}`);

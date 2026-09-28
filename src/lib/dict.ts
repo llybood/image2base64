@@ -14,7 +14,7 @@ import type { Lang } from "./site";
 
 const zh = {
   brand: "Base64 Studio",
-  langSwitchLabel: "语言 / Language",
+  langMenuLabel: "语言",
 
   noscriptTitle: "本工具需要启用 JavaScript 才能运行。",
   noscriptBody:
@@ -112,6 +112,85 @@ const zh = {
   okCleared: "已清空全部记录",
   okRemoved: "已移除该条记录",
 
+  /* ---------- shared by both tools ---------- */
+  faqHeading: "常见问题",
+  decFaqHeading: "常见问题",
+  toolNavLabel: "工具切换",
+  /* Spelled out rather than an arrow glyph. A bare "→" reads as a
+     direction indicator (which way does it go?), while the two tabs are
+     two *tools*, not two steps. "to" names the conversion instead. */
+  toolEncode: "图片转 Base64",
+  toolDecode: "Base64 转图片",
+
+  /* ---------- reverse tool: hero ---------- */
+  decHeroTitle: "Base64 转图片在线工具",
+  decHeroSubtitle:
+    "粘贴 Base64 字符串或 Data URI，解码还原为 PNG、JPG、WebP、SVG 图片，可预览、可下载 —— 全程在浏览器本地完成，字符串不会上传服务器。",
+  decHeroCtaPrimary: "粘贴 Base64 字符串",
+  decHeroCtaSecondary: "查看可解码的格式",
+
+  /* ---------- reverse tool: interface ---------- */
+  decInputTitle: "粘贴 Base64",
+  decInputLabel: "Base64 或 Data URI",
+  decPlaceholder:
+    "在此粘贴 Base64 字符串或 data:image/png;base64,… —— 换行与空格会被自动忽略",
+  decPasteButton: "从剪贴板粘贴",
+  decClearButton: "清空",
+  decInputNote:
+    "提示：带不带 data: 前缀都可以。没有前缀时，格式由解码后的字节实测判定，不看声明。",
+  decDetectedLabel: "识别结果",
+  decDetectedEmpty: "等待输入",
+  decDetectedPrefix: "前缀声明 {mime} · 解码后确认",
+  decDetectedSniffed: "{mime} · {w}×{h}",
+  decErrPrefixMismatch:
+    "前缀与字节不一致：前缀声明 {declared}，实际字节为 {actual}，已按实际格式处理。",
+  decResultTitle: "解码结果",
+  decBadgeIdle: "等待粘贴字符串",
+  decBadgeBusy: "正在解码…",
+  decBadgeDone: "解码完成",
+  decBadgeError: "解码失败",
+  decPreviewAlt: "从 Base64 解码还原的图片",
+  decStatSize: "解码后大小",
+  decStatSaving: "较文本缩减",
+  decStatDimensions: "像素尺寸",
+  decDownloadButton: "下载 .{ext}",
+  decCopyButton: "复制 Data URI",
+  decResultNote: "下载得到的是原始二进制图片文件，不是文本",
+  decPreviewUnavailable: "该格式在当前浏览器中无法预览，但文件可以正常下载。",
+
+  /* ---------- reverse tool: errors and toasts ---------- */
+  decErrEmpty: "还没有内容",
+  decErrEmptyDesc: "请先粘贴一段 Base64 字符串或 Data URI。",
+  decErrChars: "包含非 Base64 字符",
+  decErrCharsDesc:
+    "字符串里有 base64 字符集之外的字符（如 {chars}）。通常是从别处复制时带进了引号、行号或 Markdown 标记。",
+  decErrTooLarge: "字符串过长",
+  decErrTooLargeDesc:
+    "当前字符串为 {size}，解码后数据将超过 {limit} 上限，已拒绝处理，以免一次性占用过多内存。",
+  decErrNotImage: "不是可识别的图片",
+  decErrNotImageDesc:
+    "这段字符串能解码，但解出的字节不是已知的图片格式。它可能是别的内容被误当成 Base64，也可能是字符串被截断了。",
+  decErrTruncated: "字符串被截断了",
+  decErrTruncatedDesc:
+    "字符都在 base64 字符集内，但长度为 {len}，这不是合法的 base64 长度 —— 字符串大概率是从中间被截断的。请检查是否漏拷了结尾部分。",
+  decErrPaste: "无法读取剪贴板",
+  decErrPasteDesc: "浏览器拒绝了剪贴板读取权限，请手动粘贴（Ctrl+V）。",
+  decOkDecoded: "已解码 {name}",
+  decOkCopied: "已复制 Data URI",
+  decOkDownloaded: "已开始下载 {name}",
+  decOkPasted: "已从剪贴板读取内容",
+
+  /* ---------- reverse tool: side column ---------- */
+  decFormatsTitle: "可解码的图片格式",
+  decLimitsTitle: "解码限制与边界",
+  decLimitSize:
+    "解码后数据上限 <b>10 MB</b>，对应字符串约 {limit} 字符，超出直接拒绝。",
+  decLimitSniff: "格式由字节头实测判定，data: 前缀只作提示，冲突时以字节为准。",
+  decLimitWhitespace: "自动忽略换行与空格，支持 URL-safe 变体（- 与 _）与缺失的 = 补位。",
+  decLimitBlocked: "解码全程在本地内存完成，字符串不会上传。",
+  decPrivacyTitle: "本地解码，字符串不出本机",
+  decPrivacyDesc: "所有解码均在浏览器内存中完成，字符串不会上传至任何服务器。",
+
   labelUri: "Data URI",
   labelRaw: "纯 Base64",
   unitBytes: "B",
@@ -121,7 +200,7 @@ const zh = {
 
 const en: Record<keyof typeof zh, string> = {
   brand: "Base64 Studio",
-  langSwitchLabel: "Language / 语言",
+  langMenuLabel: "Language",
 
   noscriptTitle: "This tool requires JavaScript.",
   noscriptBody:
@@ -220,6 +299,86 @@ const en: Record<keyof typeof zh, string> = {
   okCleared: "All records cleared",
   okRemoved: "Record removed",
 
+  /* ---------- shared by both tools ---------- */
+  faqHeading: "Frequently asked questions",
+  decFaqHeading: "Frequently asked questions",
+  toolNavLabel: "Tool switcher",
+  /* See the zh dictionary for why this is not an arrow. */
+  toolEncode: "Image to Base64",
+  toolDecode: "Base64 to Image",
+
+  /* ---------- reverse tool: hero ---------- */
+  decHeroTitle: "Base64 to Image Converter",
+  decHeroSubtitle:
+    "Paste a base64 string or a data URI and decode it back into a PNG, JPG, WebP or SVG file you can preview and download — all in your browser, with nothing uploaded.",
+  decHeroCtaPrimary: "Paste a base64 string",
+  decHeroCtaSecondary: "See decodable formats",
+
+  /* ---------- reverse tool: interface ---------- */
+  decInputTitle: "Paste base64",
+  decInputLabel: "Base64 or data URI",
+  decPlaceholder:
+    "Paste a base64 string or data:image/png;base64,… here — line breaks and spaces are ignored",
+  decPasteButton: "Paste from clipboard",
+  decClearButton: "Clear",
+  decInputNote:
+    "A data: prefix is optional. Without one the format is read from the decoded bytes rather than from a label.",
+  decDetectedLabel: "Detected",
+  decDetectedEmpty: "Waiting for input",
+  decDetectedPrefix: "Prefix says {mime} · confirmed on decode",
+  decDetectedSniffed: "{mime} · {w}×{h}",
+  decErrPrefixMismatch:
+    "The prefix disagrees with the bytes: it says {declared}, the data is {actual}. Handled as {actual}.",
+  decResultTitle: "Decoded image",
+  decBadgeIdle: "Waiting for a string",
+  decBadgeBusy: "Decoding…",
+  decBadgeDone: "Decoded",
+  decBadgeError: "Could not decode",
+  decPreviewAlt: "The image decoded from the base64 string",
+  decStatSize: "Decoded size",
+  decStatSaving: "Smaller than the text",
+  decStatDimensions: "Pixels",
+  decDownloadButton: "Download .{ext}",
+  decCopyButton: "Copy Data URI",
+  decResultNote: "The download is the original binary image file, not text",
+  decPreviewUnavailable:
+    "This format cannot be previewed in your browser, but the file still downloads correctly.",
+
+  /* ---------- reverse tool: errors and toasts ---------- */
+  decErrEmpty: "Nothing to decode yet",
+  decErrEmptyDesc: "Paste a base64 string or a data URI first.",
+  decErrChars: "Not valid base64",
+  decErrCharsDesc:
+    "The string contains characters outside the base64 alphabet (for example {chars}). Usually a quote, a line number or Markdown markers came along with the copy.",
+  decErrTooLarge: "String too long",
+  decErrTooLargeDesc:
+    "This string is {size} and would decode to more than {limit}, so it was refused rather than risking a stalled tab.",
+  decErrNotImage: "Not a recognisable image",
+  decErrNotImageDesc:
+    "The string decodes, but the resulting bytes are not a known image format. It may be something else that merely looks like base64, or the string may be truncated.",
+  decErrTruncated: "The string is cut short",
+  decErrTruncatedDesc:
+    "Every character is valid base64, but the length is {len}, which base64 cannot produce — the string is almost certainly truncated. Check whether the end was left behind when copying.",
+  decErrPaste: "Could not read the clipboard",
+  decErrPasteDesc: "The browser denied clipboard access. Paste manually with Ctrl+V instead.",
+  decOkDecoded: "Decoded {name}",
+  decOkCopied: "Data URI copied",
+  decOkDownloaded: "Download started for {name}",
+  decOkPasted: "Read from the clipboard",
+
+  /* ---------- reverse tool: side column ---------- */
+  decFormatsTitle: "Formats you can decode",
+  decLimitsTitle: "Limits and boundaries",
+  decLimitSize:
+    "Up to <b>10 MB</b> of decoded data — roughly {limit} characters of base64; anything larger is refused outright.",
+  decLimitSniff:
+    "The format is read from the magic bytes. A data: prefix is a hint only — when the two disagree, the bytes win.",
+  decLimitWhitespace:
+    "Line breaks and spaces are ignored; the URL-safe alphabet (- and _) and missing = padding are accepted.",
+  decLimitBlocked: "Decoding happens entirely in local memory; the string is never uploaded.",
+  decPrivacyTitle: "Decoded locally — the string never leaves this device",
+  decPrivacyDesc: "Every decode happens in browser memory. No string is sent to any server.",
+
   labelUri: "Data URI",
   labelRaw: "Raw Base64",
   unitBytes: "B",
@@ -235,7 +394,7 @@ const en: Record<keyof typeof zh, string> = {
  */
 const de: Record<keyof typeof zh, string> = {
   brand: "Base64 Studio",
-  langSwitchLabel: "Sprache / Language",
+  langMenuLabel: "Sprache",
 
   noscriptTitle: "Dieses Werkzeug benötigt JavaScript.",
   noscriptBody:
@@ -338,6 +497,87 @@ const de: Record<keyof typeof zh, string> = {
   okSkipped: "{n} hinzugefügt, {m} übersprungen",
   okCleared: "Alle Einträge gelöscht",
   okRemoved: "Eintrag entfernt",
+
+  /* ---------- von beiden Werkzeugen geteilt ---------- */
+  faqHeading: "Häufige Fragen",
+  decFaqHeading: "Häufige Fragen",
+  toolNavLabel: "Werkzeugwechsel",
+  /* "zu" is the German counterpart of the English "to"; the arrow would
+     have the same direction-indicator problem here. */
+  toolEncode: "Bild zu Base64",
+  toolDecode: "Base64 zu Bild",
+
+  /* ---------- umgekehrte Richtung: Hero ---------- */
+  decHeroTitle: "Base64 zu Bild Konverter",
+  decHeroSubtitle:
+    "Füge einen Base64-String oder eine Data URI ein und dekodiere ihn zurück in eine PNG-, JPG-, WebP- oder SVG-Datei mit Vorschau und Download – alles im Browser, nichts wird hochgeladen.",
+  decHeroCtaPrimary: "Base64-String einfügen",
+  decHeroCtaSecondary: "Dekodierbare Formate ansehen",
+
+  /* ---------- umgekehrte Richtung: Oberfläche ---------- */
+  decInputTitle: "Base64 einfügen",
+  decInputLabel: "Base64 oder Data URI",
+  decPlaceholder:
+    "Base64-String oder data:image/png;base64,… hier einfügen – Zeilenumbrüche und Leerzeichen werden ignoriert",
+  decPasteButton: "Aus Zwischenablage einfügen",
+  decClearButton: "Leeren",
+  decInputNote:
+    "Ein data:-Präfix ist optional. Ohne Präfix wird das Format aus den dekodierten Bytes bestimmt, nicht aus einer Bezeichnung.",
+  decDetectedLabel: "Erkannt",
+  decDetectedEmpty: "Warte auf Eingabe",
+  decDetectedPrefix: "Präfix nennt {mime} · Bestätigung beim Dekodieren",
+  decDetectedSniffed: "{mime} · {w}×{h}",
+  decErrPrefixMismatch:
+    "Präfix und Bytes widersprechen sich: Präfix {declared}, Daten {actual}. Verarbeitet als {actual}.",
+  decResultTitle: "Dekodiertes Bild",
+  decBadgeIdle: "Warte auf einen String",
+  decBadgeBusy: "Wird dekodiert…",
+  decBadgeDone: "Dekodiert",
+  decBadgeError: "Dekodieren fehlgeschlagen",
+  decPreviewAlt: "Das aus dem Base64-String dekodierte Bild",
+  decStatSize: "Dekodierte Größe",
+  decStatSaving: "Kleiner als der Text",
+  decStatDimensions: "Pixel",
+  decDownloadButton: ".{ext} herunterladen",
+  decCopyButton: "Data URI kopieren",
+  decResultNote: "Der Download liefert die ursprüngliche Binärdatei, keinen Text",
+  decPreviewUnavailable:
+    "Dieses Format lässt sich in deinem Browser nicht anzeigen, die Datei lässt sich aber korrekt herunterladen.",
+
+  /* ---------- umgekehrte Richtung: Fehler und Hinweise ---------- */
+  decErrEmpty: "Noch nichts zu dekodieren",
+  decErrEmptyDesc: "Füge zuerst einen Base64-String oder eine Data URI ein.",
+  decErrChars: "Kein gültiges Base64",
+  decErrCharsDesc:
+    "Der String enthält Zeichen außerhalb des Base64-Alphabets (zum Beispiel {chars}). Meist sind beim Kopieren ein Anführungszeichen, eine Zeilennummer oder Markdown-Zeichen mitgekommen.",
+  decErrTooLarge: "String zu lang",
+  decErrTooLargeDesc:
+    "Dieser String ist {size} lang und würde auf mehr als {limit} dekodieren; er wurde abgelehnt, statt einen hängenden Tab zu riskieren.",
+  decErrNotImage: "Kein erkennbares Bild",
+  decErrNotImageDesc:
+    "Der String lässt sich dekodieren, die Bytes sind aber kein bekanntes Bildformat. Vielleicht ist es etwas anderes, das nur wie Base64 aussieht, oder der String ist abgeschnitten.",
+  decErrTruncated: "Der String ist abgeschnitten",
+  decErrTruncatedDesc:
+    "Alle Zeichen gehören zum Base64-Alphabet, aber die Länge {len} kann Base64 nicht erzeugen – der String ist mit hoher Wahrscheinlichkeit abgeschnitten. Prüfe, ob beim Kopieren das Ende verloren ging.",
+  decErrPaste: "Zwischenablage konnte nicht gelesen werden",
+  decErrPasteDesc: "Der Browser hat den Zugriff verweigert. Füge den Text manuell mit Strg+V ein.",
+  decOkDecoded: "{name} dekodiert",
+  decOkCopied: "Data URI kopiert",
+  decOkDownloaded: "Download von {name} gestartet",
+  decOkPasted: "Aus der Zwischenablage gelesen",
+
+  /* ---------- umgekehrte Richtung: Seitenspalte ---------- */
+  decFormatsTitle: "Formate, die du dekodieren kannst",
+  decLimitsTitle: "Grenzen und Limitierungen",
+  decLimitSize:
+    "Bis zu <b>10 MB</b> dekodierte Daten – rund {limit} Zeichen Base64; alles darüber wird abgelehnt.",
+  decLimitSniff:
+    "Das Format wird an den Magic Bytes erkannt. Ein data:-Präfix ist nur ein Hinweis – widersprechen sich beide, gewinnen die Bytes.",
+  decLimitWhitespace:
+    "Zeilenumbrüche und Leerzeichen werden ignoriert; das URL-sichere Alphabet (- und _) sowie fehlendes =-Padding werden akzeptiert.",
+  decLimitBlocked: "Das Dekodieren läuft vollständig im lokalen Speicher; der String wird nie hochgeladen.",
+  decPrivacyTitle: "Lokal dekodiert – der String verlässt dieses Gerät nicht",
+  decPrivacyDesc: "Jedes Dekodieren findet im Browserspeicher statt. Kein String wird an einen Server gesendet.",
 
   labelUri: "Data URI",
   labelRaw: "Reines Base64",

@@ -1,17 +1,17 @@
-import type { Metadata, Viewport } from "next";
+import type { Viewport } from "next";
 import type { ReactNode } from "react";
 import "../globals.css";
 import { Shell } from "@/components/Shell";
-import { buildMetadata } from "@/lib/site";
 
 /**
- * Root layout for the Chinese version, served at "/zh/".
- * The (en) route group supplies its own root layout for the site root, so
- * each language ships its own <html lang> instead of patching it at
- * runtime.
+ * Root layout for the Chinese version.
+ *
+ * Page metadata lives in each page.tsx rather than here: this group
+ * serves two pages now, and a layout-level title/canonical would be
+ * inherited by both — the encoder's canonical URL on the decoder's page.
+ * The layout's job is the document shell, so <html lang> stays a
+ * build-time attribute.
  */
-export const metadata: Metadata = buildMetadata("zh");
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
